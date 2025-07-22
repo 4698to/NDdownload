@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ND")]
 [assembly: AssemblyProduct("NDDownload")]
-[assembly: AssemblyCopyright("Copyright © ND 2023")]
+[assembly: AssemblyCopyright("Copyright © ND 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

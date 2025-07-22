@@ -34,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>mao_red.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Downloader, Version=3.0.6.0, Culture=neutral, PublicKeyToken=844973e732f6cdf4, processorArchitecture=MSIL">
       <HintPath>..\NDDownload\packages\Downloader.3.0.6\lib\net452\Downloader.dll</HintPath>
@@ -128,10 +131,6 @@
       <Link>InstallHelp.xaml.cs</Link>
       <DependentUpon>InstallHelp.xaml</DependentUpon>
     </Compile>
-    <Compile Include="..\NDDownload\MainWindow.xaml.cs">
-      <Link>MainWindow.xaml.cs</Link>
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="..\NDDownload\ViewModel\DownloadItemViewModel.cs">
       <Link>ViewModel\DownloadItemViewModel.cs</Link>
     </Compile>
@@ -150,6 +149,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
@@ -177,8 +179,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="..\NDDownload\MainWindow.xaml">
-      <Link>MainWindow.xaml</Link>
+    <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -217,6 +218,9 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="mao_red.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

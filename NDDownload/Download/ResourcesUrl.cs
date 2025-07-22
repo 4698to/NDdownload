@@ -11,20 +11,23 @@ namespace NDDownload.Download
     public class ResourcesUrl
     {
 
-        public static float version = 0.3f;
-        public static string buildtime = "2025.02.28";
-        public static string Windowtitle = $"天晴盒子安装 - 内网服务器 - 联系99U:199505 | Ver.{version}";
-        public static string Windowtitle2 = $"天晴盒子安装 - 腾讯服务器 - QQ群:797581676 | Ver.{version}";
+        public static float version = 0.4f;
+        public static string buildtime = "2025.07.22";
+        public static string Windowtitle2 = $"天晴盒子安装 - 内网服务器 - 联系99U:199505 | Ver.{version}";
+        public static string Windowtitle = $"天晴盒子安装 - 腾讯服务器 - QQ群:797581676 | Ver.{version}";
 
         public static string TempDownPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NDToolsDownload");
 
-        public static string serverPort = "192.168.251.94";//公司内网IP 
-        
+        public static string serverPort = "anim.nd.com.cn";//"192.168.251.138"; //"192.168.251.94";//公司内网IP 
+
+
         public static string serverPort2 = "www.sundaybox.cc";
         //public static string serverName1 = "http://sundaybox.cc/downloadfiles?fileid=";//腾讯服务器
 
-        public static string serverName1 = $"http://{serverPort2}/Test_download?fileid=";//腾讯服务器
-        public static string serverName2 = $"http://{serverPort}:8019/download?fileid=";//公司内网
+        public static string serverName2 = $"http://{serverPort2}/Test_download?fileid=";//腾讯服务器
+        public static string serverName1 = $"http://{serverPort}/download?fileid=";//公司内网
+        //public static string serverName1 = $"http://{serverPort}:8019/download?fileid=";//公司内网
+
 
 
         //服务器上的版本号文件，每次启动下载该文件检测是否有版本更新

@@ -348,6 +348,8 @@ namespace NDDownload.Download
                         for (int i =0;i< item.ExtractPath.Count;i++)
                         {
                             string ext_path = item.ExtractPath[i];
+                                
+                            Directory.CreateDirectory(ext_path);
 
                             List<string> history_file = new List<string>();
 

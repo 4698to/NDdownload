@@ -16,7 +16,7 @@ namespace NDDownload.Download
 
         public static string GetBestServer()
         {
-            if (pingIp())
+            if (pingServer2())
             {
                 return ResourcesUrl.serverName2; //如果内网服务器正常，就是使用内网的
             }
@@ -30,7 +30,7 @@ namespace NDDownload.Download
         {
             if (type)
             {
-                return pingIp();
+                return pingServer2();
                 //检测内网服务器是否正常，
             }else
             {
@@ -44,6 +44,18 @@ namespace NDDownload.Download
             using (Ping pingsender = new Ping())
             {
                 PingReply reply = pingsender.Send(ResourcesUrl.serverPort2, 50);
+                if (reply.Status == IPStatus.Success)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public static bool pingServer2()
+        {
+            using (Ping pingsender = new Ping())
+            {
+                PingReply reply = pingsender.Send(ResourcesUrl.serverPort, 50);
                 if (reply.Status == IPStatus.Success)
                 {
                     return true;

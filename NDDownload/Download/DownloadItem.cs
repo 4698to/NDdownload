@@ -216,9 +216,18 @@ namespace NDDownload.Download
             }
             if (this.DirType.Equals("Application"))
             {
-                this.ExtractPath = new List<string> {
-                    @"C:\ProgramData\Autodesk\ApplicationPlugins"
-                };
+                if (string.IsNullOrEmpty(this.DirPath))
+                {
+                    this.ExtractPath = new List<string> {
+                        @"C:\ProgramData\Autodesk\ApplicationPlugins"
+                    };
+                }
+                else {
+                    this.ExtractPath = new List<string> {
+                        System.IO.Path.Combine(@"C:\ProgramData\Autodesk\ApplicationPlugins",this.DirPath)
+                    };
+                }
+                
                 this.MaxRoots = ExtractPath;
             }
         }
