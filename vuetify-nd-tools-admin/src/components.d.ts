@@ -12,5 +12,6 @@ declare module 'vue' {
     NDToolsTree: typeof import('./components/NDToolsTree.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    UploadDialog: typeof import('./components/UploadDialog.vue')['default']
   }
 }

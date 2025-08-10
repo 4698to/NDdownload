@@ -1,14 +1,19 @@
 <template>
-  <v-container fluid>
-    <v-tabs v-model="tab" bg-color="primary" dark>
+  <v-container fluid class="ma-0 pa-0">
+    <!-- <v-tabs v-model="tab" bg-color="primary" dark>
       <v-tab value="installbox">天晴安装器资源包</v-tab>
       <v-tab value="ndtools">盒子 - C3S3工具集</v-tab>
       <v-tab value="ndtoolsall">盒子-全工具集</v-tab>
-    </v-tabs>
-    <v-window v-model="tab" class="mt-4">
+    </v-tabs> -->
+    <v-window v-model="tab" class="mt-0">
       <v-window-item value="installbox">
         <v-card>
-          <!-- <v-card-title>InstallBox 数据</v-card-title> -->
+
+          <v-card-title class="d-flex align-center">
+            <v-label >一个工具安装全网的3dsMax插件,让我们一起来丰富工具库,方便所有人！</v-label>
+            <v-spacer />
+            <v-btn prepend-icon="mdi-file-upload-outline" @click="openUpload = true">上传</v-btn>
+          </v-card-title>
           <v-card-text>
             <v-progress-circular v-if="loading" indeterminate color="primary" />
             <v-alert v-else-if="error" type="error">{{ error }}</v-alert>
@@ -25,9 +30,9 @@
                 <span class="pa-3">
                     {{ item.zipname }}
                 </span>
-            </template> 
+            </template>
             <template v-slot:prepend="{ item }">
-                <v-badge v-if="item.child.length > 0" color="info" :content="item.child.length">
+                <v-badge v-if="hasChildren(item)" color="info" :content="getChildCount(item)">
                     <v-icon>mdi-folder</v-icon>
                 </v-badge>
                 <v-icon v-else color="info" icon="mdi-file" >
@@ -60,10 +65,11 @@
                 <v-chip size="x-small" class="ml-2">
                     {{ formatDate(item.LastPackTime) }}
                 </v-chip>
-            </template> 
-              
+            </template>
+
             </v-treeview>
           </v-card-text>
+          <UploadDialog v-model="openUpload" @submit="onUpload" :title="`上传插件提交到【天晴安装器】资源包`"/>
         </v-card>
       </v-window-item>
       <v-window-item value="ndtools">
@@ -86,20 +92,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, inject, type Ref } from 'vue'
 import axios from '@/plugins/axios'
 import NDToolsTree from '@/components/NDToolsTree.vue'
+import UploadDialog from '@/components/UploadDialog.vue'
 
 const SeriesMin = 2015;
 const SeriesMax = 2025;
 
-const tab = ref('installbox')
+const injectedTab = inject<Ref<'installbox' | 'ndtools' | 'ndtoolsall'>>('activeTab')
+const tab = injectedTab ?? ref<'installbox' | 'ndtools' | 'ndtoolsall'>('installbox')
 const loading = ref(true)
 const error = ref('')
 const headers = ref<string[]>([])
 const rows = ref<any[]>([])
 const ndtoolsTree = ref<any[]>([])
 const ndtoolsAllTree = ref<any[]>([])
+const openUpload = ref(false)
 
 function collectAllKeys(arr: any[]): string[] {
   const keys = new Set<string>()
@@ -117,10 +126,34 @@ function collectAllKeys(arr: any[]): string[] {
 
 function normalizeChildren(arr: any[]): void {
   for (const item of arr) {
-    if (!Array.isArray(item.child)) {
-      item.child = []
-    } else {
+    if (Array.isArray(item.child)) {
       normalizeChildren(item.child)
+      if (item.child.length === 0) {
+        item.child = null
+      }
+    } else {
+      item.child = null
+    }
+  }
+}
+
+function hasChildren(item: any): boolean {
+  return Array.isArray(item?.child) && item.child.length > 0
+}
+
+function getChildCount(item: any): number {
+  return Array.isArray(item?.child) ? item.child.length : 0
+}
+
+function normalizeNDChildren(arr: any[]): void {
+  for (const item of arr) {
+    if (Array.isArray(item.Children)) {
+      normalizeNDChildren(item.Children)
+      if (item.Children.length === 0) {
+        item.Children = null
+      }
+    } else {
+      item.Children = null
     }
   }
 }
@@ -174,22 +207,41 @@ function formatDate(val: string | number) {
 }
 
 async function getdata() {
-    try {
+  try {
     loading.value = true
     error.value = ''
-    // 线上API数据
+    //const res = await axios.get('/download?fileid=InstallBox_version_full.json')
     const res = await axios.get('/download?fileid=InstallBox_version_full.json')
-    const data = res.data
-    const items = Array.isArray(data.item) ? data.item : []
-    if (items.length > 0 && typeof items[0] === 'object') {
+
+    let data: any = res.data
+    if (typeof data === 'string') {
+      try {
+        const trimmed = data.replace(/^\uFEFF/, '').trim()
+        data = JSON.parse(trimmed)
+      } catch (e) {
+        error.value = '返回的不是有效的 JSON 数据'
+        rows.value = []
+        return
+      }
+    }
+
+    const items: any[] = Array.isArray(data?.item)
+      ? data.item
+      : Array.isArray(data)
+        ? data
+        : []
+
+    if (Array.isArray(items) && items.length >= 0) {
       normalizeChildren(items)
       headers.value = collectAllKeys(items)
       rows.value = items
     } else {
       error.value = '数据格式不正确'
+      rows.value = []
     }
   } catch (e: any) {
-    error.value = e.message || '未知错误'
+    error.value = e?.message || '未知错误'
+    rows.value = []
   } finally {
     loading.value = false
   }
@@ -198,12 +250,19 @@ async function getdata() {
 async function loadNDToolsTree() {
   try {
     const res = await axios.get('/download?fileid=NDToolsListC3S3.json')
-    // 兼容根节点为对象或数组
-    if (Array.isArray(res.data)) {
-      ndtoolsTree.value = res.data
-    } else {
-      ndtoolsTree.value = [res.data]
+    let data: any = res.data
+    if (typeof data === 'string') {
+      try {
+        const trimmed = data.replace(/^\uFEFF/, '').trim()
+        data = JSON.parse(trimmed)
+      } catch (e) {
+        ndtoolsTree.value = []
+        return
+      }
     }
+    const items: any[] = Array.isArray(data) ? data : [data]
+    normalizeNDChildren(items)
+    ndtoolsTree.value = items
   } catch (e) {
     ndtoolsTree.value = []
   }
@@ -212,11 +271,19 @@ async function loadNDToolsTree() {
 async function loadNDToolsAllTree() {
   try {
     const res = await axios.get('/download?fileid=NDToolsList.json')
-    if (Array.isArray(res.data)) {
-      ndtoolsAllTree.value = res.data
-    } else {
-      ndtoolsAllTree.value = [res.data]
+    let data: any = res.data
+    if (typeof data === 'string') {
+      try {
+        const trimmed = data.replace(/^\uFEFF/, '').trim()
+        data = JSON.parse(trimmed)
+      } catch (e) {
+        ndtoolsAllTree.value = []
+        return
+      }
     }
+    const items: any[] = Array.isArray(data) ? data : [data]
+    normalizeNDChildren(items)
+    ndtoolsAllTree.value = items
   } catch (e) {
     ndtoolsAllTree.value = []
   }
@@ -231,4 +298,46 @@ onMounted(async () => {
 const headersForDataTable = computed(() =>
   headers.value.map(h => ({ text: h, value: h }))
 )
+
+async function onUpload(payload: any, callback: (result: { success: boolean, message: string }) => void) {
+  try {
+    // 创建 FormData 对象来上传文件
+    const formData = new FormData()
+    formData.append('name', payload.name)
+    formData.append('seriesMin', payload.seriesMin?.toString() || '')
+    formData.append('seriesMax', payload.seriesMax?.toString() || '')
+    formData.append('description', payload.description)
+    formData.append('helpUrl', payload.helpUrl)
+    formData.append('contact', payload.contact || '')
+    if (payload.file) {
+      formData.append('file', payload.file)
+    }
+
+    // 调用上传 API
+    const response = await axios.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    console.log('上传成功:', response.data)
+
+    // 上传成功后可以刷新数据
+    // await getdata()
+
+    callback({ success: true, message: '文件上传成功！' })
+
+  } catch (error: any) {
+    console.error('上传失败:', error)
+    let errorMessage = '上传失败'
+
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+
+    callback({ success: false, message: errorMessage })
+  }
+}
 </script>

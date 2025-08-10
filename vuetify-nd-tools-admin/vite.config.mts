@@ -64,12 +64,16 @@ export default defineConfig({
       '.vue',
     ],
   },
-  base: '/ndtooldata/',
+  //base: '/ndtooldata/',
+  base: '/',
+
   server: {
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://anim.nd.com.cn',
+        //target: 'http://anim.nd.com.cn',
+        //target: 'http://sundaybox.cc/',
+        target: 'http://localhost:8019/',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ''),
       },

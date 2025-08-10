@@ -2,7 +2,7 @@ import axios from 'axios'
 import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 
 const instance = axios.create({
-  baseURL: '/', // 可根据需要修改
+  baseURL: '/api', // 开发环境通过 Vite 代理到目标服务器
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
