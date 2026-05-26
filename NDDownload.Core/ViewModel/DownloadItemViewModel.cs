@@ -14,14 +14,9 @@ namespace NDDownload.ViewModel
     {
         private DownloadItem _item;
 
-        private string _name;
-
-
         public DownloadItemViewModel(DownloadItem item, ObservableCollection<MaxViewModel> _maxInstallSelect)
         {
             this._item = item;
-            //this._name = Path.GetFileName(item.FileName);
-            
             this._item.SetWillPath(_maxInstallSelect,false);//设置资源包的安装路径
         }
 

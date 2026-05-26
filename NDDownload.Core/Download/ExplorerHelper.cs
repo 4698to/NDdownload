@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NDDownload.Download
 {
-    internal class ExplorerHelper
+    public class ExplorerHelper
     {
         public static void OpenFolder(string folderPath)
         {

@@ -125,7 +125,7 @@ namespace NDDownload.Download
             {
                 if (max.isSelected)
                 {
-                    string max_name = GetInstallitem.GetMaxNameFormPath(max.Path);
+                    string max_name = GetInstallItem.GetMaxNameFromPath(max.Path);
                     DownloadItem im = find_child_item(max_name);
                     if (im != null) {
                         temp_item.Add(im);
@@ -141,7 +141,7 @@ namespace NDDownload.Download
 
             foreach (DownloadItem i in child)
             {
-                if (i.SeriesMinMax(GetInstallitem.GetMaxVersionFormPath(max_name)))
+                if (i.SeriesMinMax(GetInstallItem.GetMaxVersionFromPath(max_name)))
                 {
                     return i;
                 }
@@ -183,10 +183,10 @@ namespace NDDownload.Download
                 foreach (MaxViewModel max in install)
                 {
                     //版本名字
-                    string max_name = GetInstallitem.GetMaxNameFormPath(max.Path);
+                    string max_name = GetInstallItem.GetMaxNameFromPath(max.Path);
                     //检测选中的Max版本是否符合改资源包的版本区间
 
-                    if (this.SeriesMinMax(GetInstallitem.GetMaxVersionFormPath(max_name)))
+                    if (this.SeriesMinMax(GetInstallItem.GetMaxVersionFromPath(max_name)))
                     {
 
 

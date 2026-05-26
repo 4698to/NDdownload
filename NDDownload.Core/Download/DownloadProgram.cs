@@ -75,21 +75,27 @@ namespace NDDownload.Download
         }
         public async Task<bool> DownloadMain()
         {
-            /*#if NETCOREAPP
-                DummyHttpServer.HttpServer.Run(3333);
-            #endif*/
-            //await Task.Delay(1000);
+            try
+            {
+                DownloadList = GetDownList();
+                count = DownloadList.Count;
+                AppendLine($"下载 {count}\n");
 
-            DownloadList = GetDownList();
+                if (count == 0)
+                {
+                    AppendLine("没有可下载的项目。\n");
+                    CanControl = true;
+                    return false;
+                }
 
-            //DownloadList = GetDownloadItems(RemoteUrl);
-
-            count = DownloadList.Count;
-            Console.WriteLine(count);
-
-            AppendLine( $"下载 {count.ToString()}\n");
-            
-            await this.DownloadAll(DownloadList, CancelAllTokenSource.Token).ConfigureAwait(false);
+                await DownloadAll(DownloadList, CancelAllTokenSource.Token).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                AppendLine($"下载过程异常: {ex.Message}\n");
+                CanControl = true;
+                installview.ButtonText = "安装";
+            }
             return false;
         }
         private async Task DownloadAll(IEnumerable<DownloadItem> downloadList, CancellationToken cancelToken)
@@ -105,36 +111,24 @@ namespace NDDownload.Download
                     downloadItem.SetWillPath(installview.MaxInstallSelect,true);
 
                 }
-                catch {
-                    Console.WriteLine($"downloadItem.SetUse -> {downloadItem.FileName}");
+                catch (Exception ex)
+                {
+                    AppendLine($"路径设置失败 {downloadItem.FileName}: {ex.Message}\n");
                 }
-                // begin download from url
-                await this.DownloadFile(downloadItem).ConfigureAwait(false);
+                try
+                {
+                    await DownloadFile(downloadItem).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    AppendLine($"下载失败 {downloadItem.FileName}: {ex.Message}\n");
+                }
             }
-        }
-        private async Task<string> GetDownloadListFile()
-        {
-            //var down = new DownloadService(GetDownloadConfiguration());
-            //DownloadItem item = new DownloadItem();
-            //item.FileName = DownloadListFile;
-
-            //await down.DownloadFileTaskAsync(item.Url, item.FileName).ConfigureAwait(false);
-
-            string url = string.Concat(RemoteUrl, ResourcesUrl.contentList);
-            //先创建本地的文件夹，
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(ResourcesUrl.contentLocal));
-            using (WebClient web = new WebClient())
-            {
-                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Ssl3 | (SecurityProtocolType)0x300 | (SecurityProtocolType)0xC00;
-                web.Proxy = null;
-                web.DownloadFile(url, ResourcesUrl.contentLocal);
-            }
-            return ResourcesUrl.contentList;
         }
         /*private List<DownloadItem> GetDownloadItems(string remote)
         {
             float v = 0;
-            List<DownloadItem> downloadList = GetInstallitem.ReadXml(WebAddress.contentLocal, remote ,out v );
+            List<DownloadItem> downloadList = GetInstallItem.ReadXml(WebAddress.contentLocal, remote ,out v );
             
             this.installview.GetFileItemOldVersion(downloadList);
 
@@ -332,8 +326,9 @@ namespace NDDownload.Download
                         //ZipFile.ExtractToDirectory(item.FileName, item.tempPath, Encoding.UTF8);
                         ZipFile.ExtractToDirectory(item.FileName, item.tempPath);
                     }
-                    catch {
-                        AppendLine($"文件损坏 {item.FileName}\n");
+                    catch (Exception ex)
+                    {
+                        AppendLine($"解压失败 {item.FileName}: {ex.Message}\n");
                         continue;
                     }
 
@@ -375,7 +370,10 @@ namespace NDDownload.Download
                                     }
                                     file.CopyTo(newpath);
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+                                    AppendLine($"安装文件失败 {newpath}: {ex.Message}\n");
+                                }
                             }
                             
                             string history_file_pack = System.IO.Path.Combine(unistall_dir,item.MaxRoots[i], System.IO.Path.GetFileNameWithoutExtension(item.FileName));

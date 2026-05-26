@@ -12,7 +12,7 @@
         ResizeMode="CanResize"
         Closed="Window_Closed"
         MinWidth="690"
-        MinHeight="600" Icon="./imgae/mao.ico"
+        MinHeight="600" Icon="./image/mao.ico"
         >
     <Window.Resources>
         <Style x:Key="text0" TargetType="{x:Type TextBlock}">
@@ -55,23 +55,14 @@
                 <!--<DockPanel LastChildFill="False">-->
                     <!-- <Image gifd:ImageBehavior.AnimatedSource="{Binding ShowGif}" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top"/>-->
                     
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions >
+                    <Grid>
+                        <Grid.RowDefinitions>
                         <RowDefinition Height="7*" />
                         <RowDefinition Height="1*" />
                         </Grid.RowDefinitions>
-                        <Image gifd:ImageBehavior.AnimatedSource="{Binding ShowGif}" Grid.Row="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                        
-                        <StackPanel Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" Background="GreenYellow" Width="250" VerticalAlignment="Center">
-
-                        <RadioButton  Content="公司内网服务器" GroupName="options" Height="30" IsChecked="{Binding SetectSource}" HorizontalAlignment="Center" VerticalContentAlignment="Center" Click="RadioButton_Checked"/>
-                        </StackPanel>
-                        <StackPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" Background="PaleVioletRed" Width="250" VerticalAlignment="Center"  >
-                            <RadioButton  Content="腾讯云服务器" GroupName="options" Height="30" IsChecked="{Binding SetectSourceTencent}" HorizontalAlignment="Center" VerticalContentAlignment="Center" Click="RadioButton_Checked"/>
+                        <Image gifd:ImageBehavior.AnimatedSource="{Binding ShowGif}" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                        <StackPanel Grid.Row="1" HorizontalAlignment="Center" Background="PaleVioletRed" Width="280" VerticalAlignment="Center">
+                            <Label Content="腾讯云服务器" Height="30" HorizontalAlignment="Center" VerticalContentAlignment="Center"/>
                         </StackPanel>
                     </Grid>
                 <!--</DockPanel>-->

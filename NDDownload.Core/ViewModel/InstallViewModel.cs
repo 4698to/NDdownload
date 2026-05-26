@@ -1,10 +1,8 @@
 ﻿using NDDownload.Download;
-using NDDownload.Properties;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -38,7 +36,6 @@ namespace NDDownload.ViewModel
         private ObservableCollection<ScriptCollectPathsViewModel> _scriptPaths;
 
         private static string[] _maxPaths;
-        public PackageContents package;
         //下载程序
         public static DownloadProgram _fileDownloadProdram;
 
@@ -58,7 +55,7 @@ namespace NDDownload.ViewModel
 
         public bool offline = false;//离线模式
 
-        public bool _setectSource;
+        public bool _selectSource;
 
         public InstallViewModel(List<string> maxpaths) 
         {
@@ -89,12 +86,29 @@ namespace NDDownload.ViewModel
 
         }
         public void Start()
-        { 
-            Task task = new Task(this.CallMethod);
-            task.Start();
-            task.Wait();
+        {
+            try
+            {
+                CallMethodAsync().GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Start failed: {ex}");
+                SetServerUnavailable($"启动失败: {ex.Message}");
+            }
+            SetlocalVersionMessage();
+        }
 
-            this.SetlocalVersionMessage();
+        private void SetServerUnavailable(string detail = null)
+        {
+            _islink = false;
+            ButtonText = "无法连接 服务器";
+            CanControl = false;
+            FileDownloadSelect = new ObservableCollection<DownloadItemViewModel>();
+            if (!string.IsNullOrEmpty(detail))
+            {
+                Message += detail + "\n";
+            }
         }
         public List<DownloadItem> GetDownloadItemList()
         {
@@ -167,45 +181,57 @@ namespace NDDownload.ViewModel
                 FileDownloadSelect = new ObservableCollection<DownloadItemViewModel>();
             }
         }
-        private async void CallMethod()
+        private async Task CallMethodAsync()
         {
             if (this.offline)
             {
-                //离线安装资源模式
-                this.CallOfflineMethod();
-            }
-            else
-            {
-                //设置能否链接服务器
-                this._islink = await this.StartWebServer();
-                _fileDownloadProdram.RemoteUrl = this.RemoteUrl;
-
-                //Console.WriteLine($"{this.RemoteUrl}");
-                if (this._islink)
+                try
                 {
-                    //下载的内容清单
-                    bool fileDone = await Task.Run(() => SimpleDownloadListFile(this.RemoteUrl, ResourcesUrl.contentLocal));
-
-                    bool aboutDone = await Task.Run(() => SimpleDownloadListFile(this.RemoteUrl, ResourcesUrl.aboutFile));
-                    
-                    this.open_about(ResourcesUrl.aboutFile);
-
-                    //清单下载成功 之后 才能继续
-                    if (fileDone)
-                    {
-                        //创建用户选择下载内容列表
-                        List<DownloadItem> Downli = GetDownloadItems(this.RemoteUrl, ResourcesUrl.contentLocal, ref _remoteVersion);
-                        RemoteVers = _remoteVersion;
-
-
-                        FileDownloadSelect = new ObservableCollection<DownloadItemViewModel>(
-                            (from p in Downli select new DownloadItemViewModel(p, MaxInstallSelect)).ToList()
-                        );
-                        //检测资源 是不是已经安装过
-                        GetInstallConfig();
-                    }
-                    //Console.WriteLine(_remoteVersion);
+                    CallOfflineMethod();
                 }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"CallOfflineMethod failed: {ex}");
+                    Message += $"离线清单加载失败: {ex.Message}\n";
+                    FileDownloadSelect = new ObservableCollection<DownloadItemViewModel>();
+                }
+                return;
+            }
+
+            try
+            {
+                _islink = await StartWebServer().ConfigureAwait(false);
+                _fileDownloadProdram.RemoteUrl = RemoteUrl;
+
+                if (!_islink)
+                {
+                    return;
+                }
+
+                bool fileDone = await Task.Run(() => SimpleDownloadListFile(RemoteUrl, ResourcesUrl.contentLocal)).ConfigureAwait(false);
+                await Task.Run(() => SimpleDownloadListFile(RemoteUrl, ResourcesUrl.aboutFile)).ConfigureAwait(false);
+
+                open_about(ResourcesUrl.aboutFile);
+
+                if (!fileDone)
+                {
+                    Message += "无法下载安装清单，请检查网络后重试。\n";
+                    CanControl = false;
+                    return;
+                }
+
+                List<DownloadItem> Downli = GetDownloadItems(RemoteUrl, ResourcesUrl.contentLocal, ref _remoteVersion);
+                RemoteVers = _remoteVersion;
+
+                FileDownloadSelect = new ObservableCollection<DownloadItemViewModel>(
+                    (from p in Downli select new DownloadItemViewModel(p, MaxInstallSelect)).ToList()
+                );
+                GetInstallConfig();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CallMethodAsync failed: {ex}");
+                SetServerUnavailable($"连接服务器失败: {ex.Message}");
             }
         }
         private void open_about(string aboutFile)
@@ -227,28 +253,28 @@ namespace NDDownload.ViewModel
         }
         public async Task<bool> StartWebServer()
         {
-            //设置 最合适的服务器
-            //this.RemoteUrl = WebAddress.GetBestServer();
-            //this.RemoteUrl = await Task.Run(() => WebAddress.GetBestServer());
+            bool useTencent = InstallChannel.UseTencentServer(_selectSource);
+            RemoteUrl = ResourcesUrl.GetServerName(useTencent);
 
-            this.RemoteUrl = ResourcesUrl.GetServerName(_setectSource);
+            bool connect = false;
+            try
+            {
+                connect = await Task.Run(() => WebAddress.GetBestServer(useTencent)).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"StartWebServer ping failed: {ex.Message}");
+            }
 
-            bool connect = await Task.Run(() => WebAddress.GetBestServer(_setectSource));
-
-            //if (string.IsNullOrEmpty(this.RemoteUrl))
             if (!connect)
             {
-                ButtonText = "无法连接 服务器 "; CanControl = false;
-
-                FileDownloadSelect = new ObservableCollection<DownloadItemViewModel>();
-
+                SetServerUnavailable();
                 return false;
             }
-            else {
-                ButtonText = "安装"; CanControl = true;
-                return true;
-            }
 
+            ButtonText = "安装";
+            CanControl = true;
+            return true;
         }
         //关闭时保存配置文件
         public void Save()
@@ -261,16 +287,22 @@ namespace NDDownload.ViewModel
         //保存安装的内部包记录
         public void SetInstallFileConfig(DownloadItem downloaditem)
         {
-            GetInstallitem.SetInstallFile(ref config, downloaditem);
+            GetInstallItem.SetInstallFile(ref config, downloaditem);
         }
 
         public void GetToolsList()
         {
-            int count = int.Parse(config.GetValue("Count", "ToolsListWaiting", "0"));
+            if (!int.TryParse(config.GetValue("Count", "ToolsListWaiting", "0"), out int count) || count < 0)
+            {
+                return;
+            }
             for (int i = 0; i < count; i++)
             {
                 string path = config.GetValue(i.ToString(), "ToolsListWaiting");
-                bool is_select = bool.Parse(config.GetValue(i.ToString(), "ToolsListWaitingSelect", "False"));
+                if (!bool.TryParse(config.GetValue(i.ToString(), "ToolsListWaitingSelect", "False"), out bool is_select))
+                {
+                    is_select = false;
+                }
                 if (!string.IsNullOrEmpty(path) )
                 {
                     XMLPaths.Add(new ScriptCollectPathsViewModel(path, is_select));
@@ -305,13 +337,19 @@ namespace NDDownload.ViewModel
             }
             
         }
-        public async void GetScriptPath()
+        public void GetScriptPath()
         {
-            int count = int.Parse(config.GetValue("Count", "ResourcesWaiting", "0"));
+            if (!int.TryParse(config.GetValue("Count", "ResourcesWaiting", "0"), out int count) || count < 0)
+            {
+                return;
+            }
             for (int i = 0; i < count; i++)
             {
                 string path = config.GetValue(i.ToString(), "ResourcesWaiting");
-                bool is_select = bool.Parse(config.GetValue(i.ToString(), "ResourcesWaitingSelect","False"));
+                if (!bool.TryParse(config.GetValue(i.ToString(), "ResourcesWaitingSelect", "False"), out bool is_select))
+                {
+                    is_select = false;
+                }
                 if (!string.IsNullOrEmpty(path))
                 {
                     ScriptPaths.Add(new ScriptCollectPathsViewModel(path, is_select));
@@ -360,8 +398,8 @@ namespace NDDownload.ViewModel
         {
             for (int i = 0; i < FileDownloadSelect.Count; i++)
             {
-                //GetInstallitem.GetInstallFile(config, FileDownloadSelect[i].Item);
-                GetInstallitem.GetInstallFile(config, FileDownloadSelect[i]);
+                //GetInstallItem.GetInstallFile(config, FileDownloadSelect[i].Item);
+                GetInstallItem.GetInstallFile(config, FileDownloadSelect[i]);
 
             }
         }
@@ -369,7 +407,7 @@ namespace NDDownload.ViewModel
         public void SetlocalVersionMessage()
         {
             float localv = 0;
-            GetInstallitem.GetMaxIsInstall(ref config, ref localv);
+            GetInstallItem.GetMaxIsInstall(ref config, ref localv);
 
             if (localv <= 0)
             {
@@ -378,7 +416,7 @@ namespace NDDownload.ViewModel
             else {
                 this.localVersionMessage = $"上次安装内容版本 : {localv}";
             }
-            //float remotev = GetInstallitem.GetRemoteVersion();
+            //float remotev = GetInstallItem.GetRemoteVersion();
             //_remoteVersion = remotev;
 
             if (_remoteVersion > 0)
@@ -407,41 +445,43 @@ namespace NDDownload.ViewModel
         {
             //配置文件在C:\ProgramData\Autodesk\ApplicationPlugins\NDToolsBox 
             //没在MAX安装路径下，不是很准
-            GetInstallitem.SetMaxIsInstall(ref config, _remoteVersion);
+            GetInstallItem.SetMaxIsInstall(ref config, _remoteVersion);
         }
         public static bool SimpleDownloadListFile(string weburl, string localfilename)
         {
-
             string url = string.Concat(weburl, Path.GetFileName(localfilename));
-            //先创建本地的文件夹，
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(localfilename));
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(localfilename));
 
-            Console.WriteLine($"{url} -> {localfilename}");
-
-            using (WebClient web = new WebClient())
-            {
-                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Ssl3 | (SecurityProtocolType)0x300 | (SecurityProtocolType)0xC00;
-                web.Proxy = null;
-                web.DownloadFile(url, localfilename);
+                using (WebClient web = new WebClient())
+                {
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                    web.Proxy = null;
+                    web.DownloadFile(url, localfilename);
+                }
+                return File.Exists(localfilename);
             }
-            if (File.Exists(localfilename))
+            catch (Exception ex)
             {
-                return true;
-            }
-            else
-            {
+                System.Diagnostics.Debug.WriteLine($"SimpleDownloadListFile failed: {url} -> {localfilename}: {ex.Message}");
                 return false;
             }
         }
-        public List<DownloadItem> GetDownloadItems(string weburl,string xmlfile, ref float _remoteVersion)
+        public List<DownloadItem> GetDownloadItems(string weburl, string xmlfile, ref float _remoteVersion)
         {
-            //List<DownloadItem> downloadList = GetInstallitem.ReadXml(WebAddress.contentLocal,  weburl,ref _remoteVersion);
-            //string jsonfile = @"G:\Git_NDBox\天晴动作组脚本工具v4.47For2015\20240112\InstallBox_version_full.json";
-
-            List<DownloadItem> downloadList = GetInstallitem.DeserializePack(xmlfile, weburl, ref _remoteVersion);
-
-            this.GetFileItemOldVersion(downloadList);
-            return downloadList;
+            try
+            {
+                List<DownloadItem> downloadList = GetInstallItem.DeserializePack(xmlfile, weburl, ref _remoteVersion);
+                GetFileItemOldVersion(downloadList);
+                return downloadList;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetDownloadItems failed: {ex.Message}");
+                Message += $"安装清单解析失败: {ex.Message}\n";
+                return new List<DownloadItem>();
+            }
         }
         private string _showgif;
         public string ShowGif
@@ -489,20 +529,20 @@ namespace NDDownload.ViewModel
                 this.OnPropertyChanged("UserResourceDirectory");
             }
         }
-        public bool SetectSource
+        public bool SelectSource
         {
-            get { return _setectSource; }
-            set { _setectSource = value;
-                this.OnPropertyChanged("SetectSource");
+            get { return _selectSource; }
+            set { _selectSource = value;
+                this.OnPropertyChanged("SelectSource");
             }
         }
-        public bool SetectSourceTencent
+        public bool SelectSourceTencent
         {
-            get { return !_setectSource; }
+            get { return !_selectSource; }
             set
             {
-                _setectSource = !value;
-                this.OnPropertyChanged("SetectSourceTencent");
+                _selectSource = !value;
+                this.OnPropertyChanged("SelectSourceTencent");
             }
         }
         public string localVersionMessage
@@ -522,16 +562,43 @@ namespace NDDownload.ViewModel
         }
         private async void Down()
         {
-            if (!string.IsNullOrEmpty(RemoteUrl))
+            if (!_islink)
             {
-                this.Message += string.Concat(RemoteUrl, "\n");
-                //_fileDownloadProdram.Start();
-                await _fileDownloadProdram.DownloadMain();
+                Message += "当前无法连接服务器，请检查网络后重试。\n";
+                CanControl = false;
+                return;
+            }
+            if (string.IsNullOrEmpty(RemoteUrl))
+            {
+                Message += "未配置下载服务器地址。\n";
+                return;
+            }
+
+            try
+            {
+                Message += RemoteUrl + "\n";
+                await _fileDownloadProdram.DownloadMain().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Download failed: {ex}");
+                Message += $"下载失败: {ex.Message}\n";
+                CanControl = true;
+                ButtonText = "安装";
             }
         }
         public void OfflineMain()
         {
-            _fileGetProdram.DownloadMain();
+            try
+            {
+                _fileGetProdram.DownloadMain();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"OfflineMain failed: {ex}");
+                Message += $"离线安装失败: {ex.Message}\n";
+                CanControl = true;
+            }
         }
         public void StartDownload()
         {
@@ -563,7 +630,7 @@ namespace NDDownload.ViewModel
         {
             foreach (DownloadItem Item in downloadList)
             {
-                GetInstallitem.GetInstallFileVersion(ref config, Item);
+                GetInstallItem.GetInstallFileVersion(ref config, Item);
             }
         }
         public void UnistallZip()
@@ -592,10 +659,17 @@ namespace NDDownload.ViewModel
                             }
                         }
                         filelist = null;
-                        try { File.Delete(history_file_pack); } catch { }
+                        try
+                        {
+                            File.Delete(history_file_pack);
+                        }
+                        catch (IOException ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Delete uninstall log failed: {history_file_pack}: {ex.Message}");
+                        }
                     }
                 }
-                GetInstallitem.ReMoveInstallFileLog(ref config, item);
+                GetInstallItem.RemoveInstallFileLog(ref config, item);
             }
             downloadItems = null;
 
@@ -667,13 +741,11 @@ namespace NDDownload.ViewModel
         {
             get
             {
-                if (_setectSource)
+                if (InstallChannel.UseTencentServer(_selectSource))
                 {
                     return ResourcesUrl.Windowtitle;
                 }
-                else {
-                    return ResourcesUrl.Windowtitle2;
-                }
+                return ResourcesUrl.Windowtitle2;
             }
             set {
                 //ResourcesUrl.Windowtitle = value;

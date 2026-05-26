@@ -15,7 +15,7 @@
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>G:\Git_NDTools_self\天晴动作组脚本工具v4.47For2015\NDToolsBox\</PublishUrl>
+    <PublishUrl>publish\NDDownload\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -71,7 +71,7 @@
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
-    <ApplicationIcon>Imgae\mao.ico</ApplicationIcon>
+    <ApplicationIcon>Image\mao.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Downloader, Version=3.0.6.0, Culture=neutral, PublicKeyToken=844973e732f6cdf4, processorArchitecture=MSIL">
@@ -134,25 +134,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Download\DownloadItem.cs" />
-    <Compile Include="Download\DownloadProgram.cs" />
-    <Compile Include="Download\ExplorerHelper.cs" />
-    <Compile Include="Download\GetInstallitem.cs" />
-    <Compile Include="Download\OfflineInstallation.cs" />
-    <Compile Include="Download\ResourcesUrl.cs" />
-    <Compile Include="Download\WebAddress.cs" />
-    <Compile Include="Ini.cs" />
-    <Compile Include="InstallHelp.xaml.cs">
-      <DependentUpon>InstallHelp.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModel\DownloadItemViewModel.cs" />
-    <Compile Include="ViewModel\InstallViewModel.cs" />
-    <Compile Include="ViewModel\MaxViewModel.cs" />
-    <Compile Include="ViewModel\ScriptCollectPathsViewModel.cs" />
-    <Page Include="InstallHelp.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -207,22 +188,28 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Imgae\ndboxInstall.png" />
+    <Resource Include="Image\ndboxInstall.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Imgae\max_2022.png" />
+    <Resource Include="Image\max_2022.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Imgae\mao.png" />
+    <Resource Include="Image\mao.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Imgae\mao.ico" />
+    <Resource Include="Image\mao.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Imgae\20170829213751.gif" />
+    <Resource Include="Image\20170829213751.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Imgae\20171005141703.gif" />
+    <Resource Include="Image\20171005141703.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NDDownload.Core\NDDownload.Core.csproj">
+      <Project>{b8e4f3a1-2c5d-4e9f-9a1b-3d7c6e8f0a2d}</Project>
+      <Name>NDDownload.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="IWshRuntimeLibrary">

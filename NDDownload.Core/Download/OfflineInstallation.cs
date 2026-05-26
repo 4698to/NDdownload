@@ -69,9 +69,9 @@ namespace NDDownload.Download
                 {
                     item.SetWillPath(this.installview.MaxInstallSelect, true);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"downloadItem.SetUse -> {item.FileName}");
+                    this.Message.AppendLine($"路径设置失败 {item.FileName}: {ex.Message}\n");
                 }
                 //替换 下载目录为用户设置的资源目录
                 item.FolderPath = this.installview.UserResourceDirectory;
@@ -92,9 +92,9 @@ namespace NDDownload.Download
                         //ZipFile.ExtractToDirectory(item.FileName, item.tempPath, Encoding.UTF8);
                         ZipFile.ExtractToDirectory(item.FileName, item.tempPath);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        this.Message.AppendLine( $"文件损坏 {item.FileName}\n");
+                        this.Message.AppendLine($"解压失败 {item.FileName}: {ex.Message}\n");
                         continue;
                     }
 
@@ -137,7 +137,10 @@ namespace NDDownload.Download
                                 }
                                 file.CopyTo(newpath);
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                this.Message.AppendLine($"安装文件失败 {newpath}: {ex.Message}\n");
+                            }
                         }
 
                         string history_file_pack = System.IO.Path.Combine(unistall_dir, item.MaxRoots[i], System.IO.Path.GetFileNameWithoutExtension(item.FileName));

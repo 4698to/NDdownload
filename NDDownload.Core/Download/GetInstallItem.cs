@@ -19,16 +19,8 @@ using System.Security.Cryptography;
 
 namespace NDDownload.Download
 {
-    public class PackageContents
-    {
-        private XmlDocument xml;
-        private XmlNode applicationXml;
-        private XmlNode NDTOOLSXml;
-        private List<string> Maxlist;
-
-    }
     // 解析 InstallBox_version_full.xml
-    public static class GetInstallitem
+    public static class GetInstallItem
     {
         
        
@@ -39,7 +31,7 @@ namespace NDDownload.Download
         /// <param name="_path"></param>
         /// <returns></returns>
 
-        public static int GetMaxVersionFormPath(string _path)
+        public static int GetMaxVersionFromPath(string _path)
         {
             if (string.IsNullOrEmpty(_path))
             {
@@ -55,7 +47,7 @@ namespace NDDownload.Download
         /// </summary>
         /// <param name="_path"></param>
         /// <returns></returns>
-        public static string GetMaxNameFormPath(string _path)
+        public static string GetMaxNameFromPath(string _path)
         {
             string name = System.IO.Path.GetDirectoryName(_path);
             name = System.IO.Path.GetFileName(name);
@@ -72,71 +64,69 @@ namespace NDDownload.Download
         public static List<DownloadItem> DeserializePack(string path, string remote, ref float ver)
         {
             List<DownloadItem> itmelist = new List<DownloadItem>();
-            if (File.Exists(path))
+            if (!File.Exists(path))
             {
-                string jsontext = System.IO.File.ReadAllText(path, new System.Text.UTF8Encoding(false));
+                return itmelist;
+            }
 
+            try
+            {
+                string jsontext = File.ReadAllText(path, new UTF8Encoding(false));
                 JToken Jview_body = JToken.Parse(jsontext);
 
                 JValue Jver = (JValue)Jview_body["Version"];
-                ver = float.Parse(Jver.Value<string>());
-
-                //实际 的资源下载链接
-                /*JValue JUrl = (JValue)Jview_body["remoteUrl"];
-                if (JUrl != null)
+                if (Jver == null || !float.TryParse(Jver.Value<string>(), out ver))
                 {
-                    string remoteUrl = JUrl.Value<string>();
-                    if (!string.IsNullOrWhiteSpace(remoteUrl))
-                    {
-                        remote = remoteUrl;
-                    }
-                }*/
-                //body_information = Jview_body.ToObject<packInformation>();
+                    ver = 0;
+                    return itmelist;
+                }
 
                 JArray items = (JArray)Jview_body["item"];
+                if (items == null)
+                {
+                    return itmelist;
+                }
 
                 foreach (JToken i in items)
                 {
                     DownloadItem ifile = i.ToObject<DownloadItem>();
-                    if (ifile != null)
+                    if (ifile == null)
                     {
-                        ifile.SetTempPath();
-                        ifile.serverUrl = remote;
-
-                        JArray ichild = (JArray)i["child"];
-                        if (ichild != null)
-                        {
-                            ifile.isParent = true;
-                            List<DownloadItem> ichild_ = new List<DownloadItem>();
-                            foreach (JToken citem in ichild)
-                            {
-                                DownloadItem ici = citem.ToObject<DownloadItem>();
-                                if (ici != null)
-                                {
-                                    ici.serverUrl = remote;
-
-                                    ici.SetTempPath();
-                                    //ici.SetLastPackTime();
-                                    //ici.dirpath = ifile.dirpath;
-                                    ici.version = ifile.version;
-
-                                    ici.parent = ifile;
-
-                                    ichild_.Add(ici);
-
-                                }
-                            }
-                            ifile.child = ichild_;
-                            //if (is_Ischange > 0) { ifile.ischange = true; } else { ifile.ischange = false; }
-                        }
-                        else
-                        {
-                            //ifile.SetLastPackTime();
-                        }
-                        itmelist.Add(ifile);
+                        continue;
                     }
+
+                    ifile.SetTempPath();
+                    ifile.serverUrl = remote;
+
+                    JArray ichild = (JArray)i["child"];
+                    if (ichild != null)
+                    {
+                        ifile.isParent = true;
+                        List<DownloadItem> ichild_ = new List<DownloadItem>();
+                        foreach (JToken citem in ichild)
+                        {
+                            DownloadItem ici = citem.ToObject<DownloadItem>();
+                            if (ici != null)
+                            {
+                                ici.serverUrl = remote;
+                                ici.SetTempPath();
+                                ici.version = ifile.version;
+                                ici.parent = ifile;
+                                ichild_.Add(ici);
+                            }
+                        }
+                        ifile.child = ichild_;
+                    }
+                    itmelist.Add(ifile);
                 }
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"DeserializePack failed ({path}): {ex.Message}");
+                ver = 0;
+                itmelist.Clear();
+            }
+
             return itmelist;
         }
         public static List<DownloadItem> ReadXml(string xmlfile, string remote,ref float v)
@@ -271,19 +261,26 @@ namespace NDDownload.Download
             List<string> LocationPath = new List<string>();
             using (RegistryKey software = hkml.OpenSubKey("SOFTWARE\\Autodesk\\3dsMax", RegistryKeyPermissionCheck.ReadSubTree, RegistryRights.ReadKey))
             {
+                if (software == null)
+                {
+                    return LocationPath;
+                }
                 subkeys = software.GetSubKeyNames();
                 foreach (string key in subkeys)
                 {
-                    RegistryKey Maxkey = software.OpenSubKey(key, RegistryKeyPermissionCheck.ReadSubTree);
-                    //Console.WriteLine(Maxkey.ValueCount);
+                    using (RegistryKey Maxkey = software.OpenSubKey(key, RegistryKeyPermissionCheck.ReadSubTree))
+                    {
+                        if (Maxkey == null)
+                        {
+                            continue;
+                        }
                     var value = Maxkey.GetValue("location", null);
                     //拿到全部 3dsMax 安装路径
                     if (value != null)
                     {
                         LocationPath.Add(value.ToString());
-                        //Console.WriteLine(value);
                     }
-                    Maxkey.Close();
+                    }
                 }
             }
             return LocationPath;
@@ -296,7 +293,7 @@ namespace NDDownload.Download
             return bool.Parse(v);
         }
 
-        public static void ReMoveInstallFileLog(ref Ini config, DownloadItem Items)
+        public static void RemoveInstallFileLog(ref Ini config, DownloadItem Items)
         {
             string filename = Path.GetFileName(Items.FileName);
             
@@ -474,7 +471,9 @@ namespace NDDownload.Download
                     return 0.0f;
                 }
             }
-            catch { 
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetRemoteVersion failed: {ex.Message}");
                 return 0.0f;
             }
         }

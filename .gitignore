@@ -18,4 +18,7 @@ bin-release/
 # information for Eclipse / Flash Builder.
 .vs/nddownload/v17
 .vs
-NDDownload/NDDownload2/publish
+dist/
+NDDownload/publish/
+NDDownloadIn/publish/
+# 统一发布包目录名见 build-channels.ps1 -OutputFolder

@@ -11,8 +11,8 @@ namespace NDDownload.Download
     public class ResourcesUrl
     {
 
-        public static float version = 0.4f;
-        public static string buildtime = "2025.07.22";
+        public static float version = 0.42f;
+        public static string buildtime = "2026.05.26";
         public static string Windowtitle2 = $"天晴盒子安装 - 内网服务器 - 联系99U:199505 | Ver.{version}";
         public static string Windowtitle = $"天晴盒子安装 - 腾讯服务器 - QQ群:797581676 | Ver.{version}";
 
@@ -65,7 +65,7 @@ namespace NDDownload.Download
         }
         public static string GetShowGif()
         {
-            string randomGifFile = "./imgae/20171005141703.gif";
+            string randomGifFile = "./image/20171005141703.gif";
 
             //程序运行路径
             string appPath = AppDomain.CurrentDomain.BaseDirectory;
