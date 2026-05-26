@@ -8,7 +8,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    DataKeyDialog: typeof import('./components/DataKeyDialog.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    JsonEditDialog: typeof import('./components/JsonEditDialog.vue')['default']
+    NDNodeEditDialog: typeof import('./components/NDNodeEditDialog.vue')['default']
     NDToolsTree: typeof import('./components/NDToolsTree.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

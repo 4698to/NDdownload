@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios'
+import { getDataKey } from '@/utils/dataKey'
 
 const instance = axios.create({
   baseURL: '/api', // 开发环境通过 Vite 代理到目标服务器
@@ -12,7 +13,11 @@ const instance = axios.create({
 // 请求拦截器
 instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // 可在此添加 token 等
+    const dataKey = getDataKey()
+    const method = config.method?.toLowerCase()
+    if (dataKey && method && ['post', 'put', 'patch', 'delete'].includes(method)) {
+      config.headers.set('X-NDTools-Data-Key', dataKey)
+    }
     return config
   },
   (error: any) => Promise.reject(error)
@@ -22,7 +27,9 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: any) => {
-    // 可统一处理错误
+    if (error?.response?.status === 401) {
+      import('@/utils/dataKey').then(({ clearDataKey }) => clearDataKey())
+    }
     return Promise.reject(error)
   }
 )

@@ -12,7 +12,8 @@
           <v-card-title class="d-flex align-center">
             <v-label >一个工具安装全网的3dsMax插件,让我们一起来丰富工具库,方便所有人！</v-label>
             <v-spacer />
-            <v-btn prepend-icon="mdi-file-upload-outline" @click="openUpload = true">上传</v-btn>
+            <v-btn v-if="isAuthorized" prepend-icon="mdi-pencil" variant="tonal" class="mr-2" @click="openEditInstallBox = true">编辑数据</v-btn>
+            <v-btn prepend-icon="mdi-file-upload-outline" @click="requestUpload">上传</v-btn>
           </v-card-title>
           <v-card-text>
             <v-progress-circular v-if="loading" indeterminate color="primary" />
@@ -74,7 +75,11 @@
       </v-window-item>
       <v-window-item value="ndtools">
         <v-card>
-          <!-- <v-card-title>C3S3工具集</v-card-title> -->
+          <v-card-title class="d-flex align-center">
+            <v-label>C3S3 工具集数据</v-label>
+            <v-spacer />
+            <v-btn v-if="isAuthorized" prepend-icon="mdi-pencil" variant="tonal" @click="openEditNDToolsC3S3 = true">编辑数据</v-btn>
+          </v-card-title>
           <v-card-text>
             <NDToolsTree :items="ndtoolsTree" />
           </v-card-text>
@@ -82,12 +87,36 @@
       </v-window-item>
       <v-window-item value="ndtoolsall">
         <v-card>
+          <v-card-title class="d-flex align-center">
+            <v-label>盒子全工具集数据</v-label>
+            <v-spacer />
+            <v-btn v-if="isAuthorized" prepend-icon="mdi-pencil" variant="tonal" @click="openEditNDTools = true">编辑数据</v-btn>
+          </v-card-title>
           <v-card-text>
             <NDToolsTree :items="ndtoolsAllTree" />
           </v-card-text>
         </v-card>
       </v-window-item>
     </v-window>
+
+    <JsonEditDialog
+      v-model="openEditInstallBox"
+      file-id="InstallBox_version_full.json"
+      title="编辑 InstallBox_version_full.json"
+      @saved="onJsonSaved"
+    />
+    <JsonEditDialog
+      v-model="openEditNDTools"
+      file-id="NDToolsList.json"
+      title="编辑 NDToolsList.json"
+      @saved="onJsonSaved"
+    />
+    <JsonEditDialog
+      v-model="openEditNDToolsC3S3"
+      file-id="NDToolsListC3S3.json"
+      title="编辑 NDToolsListC3S3.json"
+      @saved="onJsonSaved"
+    />
   </v-container>
 </template>
 
@@ -96,11 +125,16 @@ import { ref, onMounted, computed, inject, type Ref } from 'vue'
 import axios from '@/plugins/axios'
 import NDToolsTree from '@/components/NDToolsTree.vue'
 import UploadDialog from '@/components/UploadDialog.vue'
+import JsonEditDialog from '@/components/JsonEditDialog.vue'
+import { requestDataKeyKey, isAuthorizedKey } from '@/keys/dataKey'
+import type { RequestDataKeyFn } from '@/keys/dataKey'
 
 const SeriesMin = 2015;
 const SeriesMax = 2025;
 
 const injectedTab = inject<Ref<'installbox' | 'ndtools' | 'ndtoolsall'>>('activeTab')
+const requestDataKey = inject<RequestDataKeyFn>(requestDataKeyKey)!
+const isAuthorized = inject(isAuthorizedKey)!
 const tab = injectedTab ?? ref<'installbox' | 'ndtools' | 'ndtoolsall'>('installbox')
 const loading = ref(true)
 const error = ref('')
@@ -109,6 +143,15 @@ const rows = ref<any[]>([])
 const ndtoolsTree = ref<any[]>([])
 const ndtoolsAllTree = ref<any[]>([])
 const openUpload = ref(false)
+const openEditInstallBox = ref(false)
+const openEditNDTools = ref(false)
+const openEditNDToolsC3S3 = ref(false)
+
+function requestUpload() {
+  requestDataKey(() => {
+    openUpload.value = true
+  })
+}
 
 function collectAllKeys(arr: any[]): string[] {
   const keys = new Set<string>()
@@ -298,6 +341,16 @@ onMounted(async () => {
 const headersForDataTable = computed(() =>
   headers.value.map(h => ({ text: h, value: h }))
 )
+
+async function onJsonSaved(fileId: string) {
+  if (fileId === 'InstallBox_version_full.json') {
+    await getdata()
+  } else if (fileId === 'NDToolsList.json') {
+    await loadNDToolsAllTree()
+  } else if (fileId === 'NDToolsListC3S3.json') {
+    await loadNDToolsTree()
+  }
+}
 
 async function onUpload(payload: any, callback: (result: { success: boolean, message: string }) => void) {
   try {

@@ -3,7 +3,7 @@
     <div class="d-flex align-center mb-2">
       <v-label theme="light" color="white">提交任何插件的使用意见，如插件路径、使用说明、作者等信息，让我们一起来丰富工具库,方便所有人！</v-label>
       <v-spacer />
-      <v-btn @click="openUpload = true" prepend-icon="mdi-file-upload-outline">上传</v-btn>
+      <v-btn @click="requestUpload" prepend-icon="mdi-file-upload-outline">上传</v-btn>
     </div>
     <v-text-field 
       v-model="searchText"
@@ -65,9 +65,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed, ref, watch } from 'vue'
+import { defineProps, computed, ref, watch, inject } from 'vue'
 import axios from '@/plugins/axios'
 import UploadDialog from '@/components/UploadDialog.vue'
+import { requestDataKeyKey } from '@/keys/dataKey'
+import type { RequestDataKeyFn } from '@/keys/dataKey'
 
 type NDNode = {
   Name?: string
@@ -79,8 +81,15 @@ type NDNode = {
 
 const props = defineProps<{ items: NDNode[] }>()
 
+const requestDataKey = inject<RequestDataKeyFn>(requestDataKeyKey)!
 const searchText = ref('')
 const openUpload = ref(false)
+
+function requestUpload() {
+  requestDataKey(() => {
+    openUpload.value = true
+  })
+}
 
 function textMatches(node: NDNode, query: string): boolean {
   if (!query) return true
@@ -133,34 +142,47 @@ const filteredItems = computed(() => {
   return attachPathId(base)
 })
 
-// 展开控制：有搜索词时展开所有含有 Children 的分支，否则使用用户手动展开值
 const userOpened = ref<string[]>([])
 const openedModel = ref<string[]>([])
 
-watch(filteredItems, (items) => {
-  const q = searchText.value.trim()
-  if (!q) {
-    openedModel.value = [...userOpened.value]
-    return
-  }
-  const allBranchIds: string[] = []
-  function collectBranchIds(nodes: NDNode[]) {
-    for (const n of nodes) {
+function collectBranchIds(nodes: NDNode[]): string[] {
+  const ids: string[] = []
+  function walk(list: NDNode[]) {
+    for (const n of list) {
       if (Array.isArray(n.Children) && n.Children.length > 0) {
-        allBranchIds.push(n.PathId as string)
-        collectBranchIds(n.Children)
+        ids.push(n.PathId as string)
+        walk(n.Children)
       }
     }
   }
-  collectBranchIds(items)
-  openedModel.value = allBranchIds
-}, { immediate: true })
+  walk(nodes)
+  return ids
+}
 
-// 同步用户手动展开状态（仅在非搜索时记录）
-watch(openedModel, (val) => {
-  if (!searchText.value.trim()) {
-    userOpened.value = [...val]
+function arraysEqual(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((v, i) => v === b[i])
+}
+
+function syncOpenedFromSearch() {
+  const q = searchText.value.trim()
+  if (!q) {
+    if (!arraysEqual(openedModel.value, userOpened.value)) {
+      openedModel.value = [...userOpened.value]
+    }
+    return
   }
+  const ids = collectBranchIds(filteredItems.value)
+  if (!arraysEqual(openedModel.value, ids)) {
+    openedModel.value = ids
+  }
+}
+
+watch(searchText, syncOpenedFromSearch)
+
+watch(openedModel, (val) => {
+  if (searchText.value.trim()) return
+  if (arraysEqual(userOpened.value, val)) return
+  userOpened.value = [...val]
 })
 
 async function onUpload(payload: any, callback: (result: { success: boolean, message: string }) => void) {
