@@ -19,11 +19,21 @@
         v-if="isAuthorized && !isAdminPage"
         variant="tonal"
         size="small"
+        prepend-icon="mdi-package-variant"
+        class="mr-2"
+        to="/installbox-edit"
+      >
+        安装器管理
+      </v-btn>
+      <v-btn
+        v-if="isAuthorized && !isAdminPage"
+        variant="tonal"
+        size="small"
         prepend-icon="mdi-table-edit"
         class="mr-2"
         to="/ndtools-edit"
       >
-        数据管理
+        NDTools 管理
       </v-btn>
       <v-chip
         v-if="isAuthorized"
@@ -77,7 +87,9 @@ import { clearDataKey, hasDataKey, onDataKeyChange } from '@/utils/dataKey'
 
 const theme = useTheme()
 const route = useRoute()
-const isAdminPage = computed(() => route.path === '/ndtools-edit')
+const isAdminPage = computed(() =>
+  route.path === '/ndtools-edit' || route.path === '/installbox-edit',
+)
 const isDark = computed(() => theme.global.current.value.dark)
 const activeTab = ref<'installbox' | 'ndtools' | 'ndtoolsall'>('installbox')
 provide('activeTab', activeTab)

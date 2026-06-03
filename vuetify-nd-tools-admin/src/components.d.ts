@@ -10,6 +10,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     DataKeyDialog: typeof import('./components/DataKeyDialog.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    InstallBoxNodeEditDialog: typeof import('./components/InstallBoxNodeEditDialog.vue')['default']
     JsonEditDialog: typeof import('./components/JsonEditDialog.vue')['default']
     NDNodeEditDialog: typeof import('./components/NDNodeEditDialog.vue')['default']
     NDToolsTree: typeof import('./components/NDToolsTree.vue')['default']

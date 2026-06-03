@@ -1,5 +1,5 @@
 {
-  "packpath": null,
+  "packpath": "\\\\192.168.72.43\\DownloadFile\\push",
   "_version": "1.48",
   "_lastPack": "G:\\Git_NDBox\\20251014\\InstallBox_version_full.json",
   "is_version_raise": true,
@@ -17,7 +17,7 @@
       "type": 0,
       "dirpath": "scripts",
       "SeriesMin": 2015,
-      "SeriesMax": 2016,
+      "SeriesMax": 2026,
       "helplink": "https://sundaybox.cc/pages/97cf74/",
       "abouttext": "简体魔域C3导出助手 - 公司内网下载，2026-07-01 ，简体魔域-【更新】导出助手 1.374 ，修复分段导出的BUG",
       "LastWriteTime": "/Date(1760439576534+0800)/",
@@ -28,7 +28,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 2.7
+      "version": 2.7,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\C3\\2015\\plugins",
@@ -48,7 +49,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 3
+      "version": 3,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\C3\\2016\\plugins",
@@ -68,7 +70,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 2.6
+      "version": 2.6,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDToolsFile",
@@ -88,7 +91,8 @@
       "IsEnabled": true,
       "quick": true,
       "isParent": false,
-      "version": 5.81
+      "version": 5.81,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDToolsShortcut",
@@ -108,7 +112,8 @@
       "IsEnabled": true,
       "quick": true,
       "isParent": false,
-      "version": 4.71
+      "version": 4.71,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\stdplugs",
@@ -128,7 +133,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 4.41
+      "version": 4.41,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\UI_ln",
@@ -148,7 +154,8 @@
       "IsEnabled": true,
       "quick": true,
       "isParent": false,
-      "version": 4.61
+      "version": 4.61,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\plugins",
@@ -168,7 +175,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 4.41
+      "version": 4.41,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDToolsBoxIN",
@@ -188,7 +196,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 5.71
+      "version": 5.71,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox",
@@ -228,7 +237,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox\\2016",
@@ -248,7 +258,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox\\2017",
@@ -268,7 +279,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox\\2018",
@@ -288,7 +300,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox\\2019",
@@ -308,7 +321,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox\\2020",
@@ -328,7 +342,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox\\2021",
@@ -348,7 +363,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox\\2022",
@@ -368,7 +384,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox\\2023",
@@ -388,7 +405,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\NDBox\\2024",
@@ -408,7 +426,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         }
       ]
     },
@@ -430,7 +449,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 1.2
+      "version": 1.2,
+      "child": null
     },
     {
       "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails",
@@ -470,7 +490,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2009\\plugins",
@@ -490,7 +511,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2010\\plugins",
@@ -510,7 +532,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2011\\plugins",
@@ -530,7 +553,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2012\\plugins",
@@ -550,7 +574,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2013\\plugins",
@@ -570,7 +595,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2014\\plugins",
@@ -590,7 +616,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2015\\plugins",
@@ -610,7 +637,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2016\\plugins",
@@ -630,7 +658,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2017\\plugins",
@@ -650,7 +679,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2018\\plugins",
@@ -670,7 +700,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2019\\plugins",
@@ -690,7 +721,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2020\\plugins",
@@ -710,7 +742,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2021\\plugins",
@@ -730,7 +763,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2022\\plugins",
@@ -750,7 +784,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2023\\plugins",
@@ -770,7 +805,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2024\\plugins",
@@ -790,7 +826,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\2025\\plugins",
@@ -810,7 +847,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\GhostTrails\\9\\plugins",
@@ -830,7 +868,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         }
       ]
     },
@@ -852,7 +891,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 1
+      "version": 1,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\DIMaster_20080824",
@@ -872,7 +912,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 0.9
+      "version": 0.9,
+      "child": null
     },
     {
       "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\Scripts",
@@ -892,7 +933,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 0.9
+      "version": 0.9,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDTools\\Pose Driver Connect\\Max2UE5PoseDriver",
@@ -912,7 +954,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 0.7
+      "version": 0.7,
+      "child": null
     },
     {
       "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.09.02",
@@ -952,7 +995,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.09.02\\2019",
@@ -972,7 +1016,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.09.02\\2020",
@@ -992,7 +1037,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.09.02\\2021",
@@ -1012,7 +1058,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.09.02\\2022",
@@ -1032,7 +1079,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.09.02\\2023",
@@ -1052,7 +1100,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.09.02\\2024",
@@ -1072,7 +1121,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.09.02\\2025",
@@ -1092,7 +1142,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         }
       ]
     },
@@ -1134,7 +1185,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.04.02\\{code_GetMaxDir_2015}",
@@ -1154,7 +1206,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.04.02\\{code_GetMaxDir_2016}",
@@ -1174,7 +1227,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         },
         {
           "targetpath": "G:\\Git_NDBox\\天晴动作组脚本工具v4.47For2015\\SmartRefs 1.04.02\\{code_GetMaxDir_2017}",
@@ -1194,7 +1248,8 @@
           "IsEnabled": true,
           "quick": false,
           "isParent": false,
-          "version": 0.1
+          "version": 0.1,
+          "child": null
         }
       ]
     },
@@ -1216,7 +1271,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 0.2
+      "version": 0.2,
+      "child": null
     },
     {
       "targetpath": "G:\\Github\\BsKeyTools\\_BsKeyTools\\AnimRef",
@@ -1236,7 +1292,8 @@
       "IsEnabled": true,
       "quick": false,
       "isParent": false,
-      "version": 0.2
+      "version": 0.2,
+      "child": null
     }
   ]
 }

@@ -1,9 +1,16 @@
 <template>
   <div class="ndtools-admin d-flex">
     <v-sheet class="admin-nav flex-shrink-0" width="240" border="e">
-      <div class="pa-4 text-subtitle-1 font-weight-bold">NDTools 数据管理</div>
+      <div class="pa-4 text-subtitle-1 font-weight-bold">数据管理</div>
 
       <v-list nav density="compact" class="px-2">
+        <v-list-item
+          title="天晴安装器"
+          subtitle="InstallBox_version_full.json"
+          prepend-icon="mdi-package-variant"
+          rounded="lg"
+          to="/installbox-edit"
+        />
         <v-list-item
           v-for="item in navItems"
           :key="item.value"

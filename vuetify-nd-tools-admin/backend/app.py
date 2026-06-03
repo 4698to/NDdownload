@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from werkzeug.utils import secure_filename
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(os.environ.get("DATA_DIR", BASE_DIR))
+PACK_DIR = Path(os.environ.get("PACK_DIR", DATA_DIR))
 BACKUP_DIR = Path(__file__).resolve().parent / "backups"
 UPLOAD_DIR = Path(__file__).resolve().parent / "uploads"
 
@@ -75,9 +77,127 @@ def _write_json_file(filepath: Path, data) -> None:
     filepath.write_text(text + "\n", encoding="utf-8")
 
 
+def _is_safe_fileid(fileid: str) -> bool:
+    if not fileid or fileid in (".", ".."):
+        return False
+    return "/" not in fileid and "\\" not in fileid and ".." not in fileid
+
+
+def _pack_file_candidates(fileid: str) -> list[str]:
+    name = fileid.strip()
+    if not name:
+        return []
+    candidates = [name]
+    lower = name.lower()
+    if lower.endswith(".zip"):
+        candidates.append(name[:-4])
+    else:
+        candidates.append(f"{name}.zip")
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for item in candidates:
+        if item not in seen:
+            seen.add(item)
+            ordered.append(item)
+    return ordered
+
+
+def _resolve_pack_dir(packpath: str | None) -> tuple[Path | None, str | None]:
+    if not packpath or not str(packpath).strip():
+        return None, "未配置 packpath"
+    path = Path(str(packpath).strip())
+    try:
+        if not path.is_dir():
+            return None, f"packpath 不是有效目录: {path}"
+    except OSError as exc:
+        return None, f"无法访问 packpath: {exc}"
+    return path, None
+
+
+def _resolve_pack_file_in_dir(fileid: str, pack_dir: Path) -> Path | None:
+    if not _is_safe_fileid(fileid):
+        return None
+    for candidate in _pack_file_candidates(fileid):
+        path = pack_dir / candidate
+        if path.is_file():
+            return path
+    return None
+
+
+def _check_pack_file_exists(fileid: str, pack_dir: Path) -> dict:
+    path = _resolve_pack_file_in_dir(fileid, pack_dir)
+    if path is not None:
+        return {
+            "exists": True,
+            "source": "packpath",
+            "filename": path.name,
+            "path": str(path),
+        }
+    return {
+        "exists": False,
+        "source": "packpath",
+        "filename": None,
+        "path": None,
+    }
+
+
 @app.get("/health")
 def health():
-    return jsonify({"status": "ok", "data_dir": str(DATA_DIR)})
+    return jsonify({
+        "status": "ok",
+        "data_dir": str(DATA_DIR),
+        "pack_dir": str(PACK_DIR),
+    })
+
+
+@app.post("/installbox/check-files")
+def check_installbox_files():
+    payload = request.get_json(silent=True) or {}
+    files = payload.get("files", [])
+    packpath = payload.get("packpath", "")
+
+    if not isinstance(files, list):
+        return jsonify({"error": "files 必须是数组"}), 400
+
+    pack_dir, dir_error = _resolve_pack_dir(packpath if isinstance(packpath, str) else "")
+    if dir_error:
+        return jsonify({"error": dir_error, "packpath": packpath}), 400
+
+    results: dict[str, dict] = {}
+    missing: list[str] = []
+    unique_names: list[str] = []
+    for raw_name in files:
+        if not isinstance(raw_name, str):
+            continue
+        name = raw_name.strip()
+        if not name or not _is_safe_fileid(name):
+            continue
+        if name in results:
+            continue
+        unique_names.append(name)
+
+    max_workers = min(12, max(1, len(unique_names)))
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(_check_pack_file_exists, name, pack_dir): name
+            for name in unique_names
+        }
+        for future in as_completed(futures):
+            name = futures[future]
+            info = future.result()
+            results[name] = info
+            if not info["exists"]:
+                missing.append(name)
+
+    missing.sort()
+
+    return jsonify({
+        "results": results,
+        "missing": missing,
+        "missingCount": len(missing),
+        "checkedCount": len(results),
+        "packpath": str(pack_dir),
+    })
 
 
 @app.post("/auth/verify")

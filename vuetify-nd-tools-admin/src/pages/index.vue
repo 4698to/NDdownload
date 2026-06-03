@@ -12,7 +12,7 @@
           <v-card-title class="d-flex align-center">
             <v-label >一个工具安装全网的3dsMax插件,让我们一起来丰富工具库,方便所有人！</v-label>
             <v-spacer />
-            <v-btn v-if="isAuthorized" prepend-icon="mdi-pencil" variant="tonal" class="mr-2" @click="openEditInstallBox = true">编辑数据</v-btn>
+            <v-btn v-if="isAuthorized" prepend-icon="mdi-pencil" variant="tonal" class="mr-2" to="/installbox-edit">编辑数据</v-btn>
             <v-btn prepend-icon="mdi-file-upload-outline" @click="requestUpload">上传</v-btn>
           </v-card-title>
           <v-card-text>
@@ -100,12 +100,6 @@
     </v-window>
 
     <JsonEditDialog
-      v-model="openEditInstallBox"
-      file-id="InstallBox_version_full.json"
-      title="编辑 InstallBox_version_full.json"
-      @saved="onJsonSaved"
-    />
-    <JsonEditDialog
       v-model="openEditNDTools"
       file-id="NDToolsList.json"
       title="编辑 NDToolsList.json"
@@ -143,7 +137,6 @@ const rows = ref<any[]>([])
 const ndtoolsTree = ref<any[]>([])
 const ndtoolsAllTree = ref<any[]>([])
 const openUpload = ref(false)
-const openEditInstallBox = ref(false)
 const openEditNDTools = ref(false)
 const openEditNDToolsC3S3 = ref(false)
 
@@ -343,9 +336,7 @@ const headersForDataTable = computed(() =>
 )
 
 async function onJsonSaved(fileId: string) {
-  if (fileId === 'InstallBox_version_full.json') {
-    await getdata()
-  } else if (fileId === 'NDToolsList.json') {
+  if (fileId === 'NDToolsList.json') {
     await loadNDToolsAllTree()
   } else if (fileId === 'NDToolsListC3S3.json') {
     await loadNDToolsTree()
