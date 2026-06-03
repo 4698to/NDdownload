@@ -75,6 +75,7 @@ export function flattenTree(
 ): FlatRow[] {
   const rows: FlatRow[] = []
   nodes.forEach((node, index) => {
+    if (!node || typeof node !== 'object') return
     const indexPath = [...parentIndexPath, index]
     const label = node.Name || node.SubPath || '未命名'
     const path = parentPath ? `${parentPath} / ${label}` : label
@@ -88,21 +89,63 @@ export function flattenTree(
   return rows
 }
 
+export function rowMatchesQuery(row: FlatRow, query: string): boolean {
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  const n = row.node
+  return [
+    row.path,
+    n.Name,
+    n.SubPath,
+    n.StartupFolder,
+    n.ExtensionType,
+    n.message,
+    n.HelpUrl,
+  ].some(v => typeof v === 'string' && v.toLowerCase().includes(q))
+}
+
 export function filterRows(rows: FlatRow[], query: string): FlatRow[] {
   const q = query.trim().toLowerCase()
   if (!q) return rows
-  return rows.filter(row => {
-    const n = row.node
-    return [
-      row.path,
-      n.Name,
-      n.SubPath,
-      n.StartupFolder,
-      n.ExtensionType,
-      n.message,
-      n.HelpUrl,
-    ].some(v => typeof v === 'string' && v.toLowerCase().includes(q))
-  })
+  return rows.filter(row => rowMatchesQuery(row, q))
+}
+
+export function getAncestorRowIds(indexPath: number[]): string[] {
+  const ids: string[] = []
+  for (let i = 1; i < indexPath.length; i++) {
+    ids.push(indexPath.slice(0, i).join('-'))
+  }
+  return ids
+}
+
+export function rowHasChildren(row: FlatRow): boolean {
+  const children = row.node.Children
+  return Array.isArray(children) && children.length > 0
+}
+
+export function isRowVisible(row: FlatRow, collapsedIds: Set<string>): boolean {
+  return !getAncestorRowIds(row.indexPath).some(id => collapsedIds.has(id))
+}
+
+export function filterVisibleRows(rows: FlatRow[], collapsedIds: Set<string>): FlatRow[] {
+  return rows.filter(row => isRowVisible(row, collapsedIds))
+}
+
+export function getSearchVisibleRowIds(rows: FlatRow[], query: string): Set<string> {
+  const visible = new Set<string>()
+  for (const row of rows) {
+    if (!rowMatchesQuery(row, query)) continue
+    visible.add(row.rowId)
+    for (const id of getAncestorRowIds(row.indexPath)) {
+      visible.add(id)
+    }
+  }
+  return visible
+}
+
+export function filterSearchVisibleRows(rows: FlatRow[], query: string): FlatRow[] {
+  const visibleIds = getSearchVisibleRowIds(rows, query)
+  return rows.filter(row => visibleIds.has(row.rowId))
 }
 
 export function getNodeByIndexPath(nodes: NDNode[], indexPath: number[]): NDNode | null {

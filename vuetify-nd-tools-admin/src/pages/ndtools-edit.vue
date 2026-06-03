@@ -69,7 +69,7 @@
           {{ successMessage }}
         </v-alert>
 
-        <div class="d-flex align-center flex-wrap ga-2 mb-4">
+        <div class="d-flex align-center flex-wrap ga-2 mb-1">
             <v-text-field
               v-model="searchText"
               prepend-inner-icon="mdi-magnify"
@@ -114,7 +114,27 @@
             >
               删除选中
             </v-btn>
-            <v-chip color="info" variant="tonal">共 {{ filteredRows.length }} 条</v-chip>
+            <v-btn
+              prepend-icon="mdi-unfold-more-horizontal"
+              variant="text"
+              size="small"
+              :disabled="!!searchQuery"
+              @click="expandAll"
+            >
+              全部展开
+            </v-btn>
+            <v-btn
+              prepend-icon="mdi-unfold-less-horizontal"
+              variant="text"
+              size="small"
+              :disabled="!!searchQuery"
+              @click="collapseAll"
+            >
+              全部折叠
+            </v-btn>
+            <v-chip color="info" variant="tonal">
+              显示 {{ displayRows.length }} / 共 {{ flatRows.length }} 条
+            </v-chip>
           </div>
 
           <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-2" />
@@ -123,7 +143,7 @@
             <div class="workspace-table flex-grow-1 min-width-0">
               <v-data-table
                 :headers="headers"
-                :items="filteredRows"
+                :items="displayRows"
                 item-value="rowId"
                 density="compact"
                 fixed-header
@@ -135,13 +155,33 @@
                 @click:row="onRowClick"
               >
                 <template #item.path="{ item }">
-                  <div class="d-flex align-center ga-2">
+                  <div
+                    class="d-flex align-center ga-1 node-path-cell"
+                    :style="{ paddingLeft: `${getNodeDepth(item) * 20}px` }"
+                    :title="item.path"
+                  >
+                    <v-btn
+                      v-if="rowHasChildren(item)"
+                      variant="text"
+                      size="x-small"
+                      density="compact"
+                      icon
+                      class="expand-btn flex-shrink-0"
+                      :disabled="!!searchQuery"
+                      @click.stop="toggleExpand(item)"
+                    >
+                      <v-icon
+                        :icon="isRowExpanded(item) ? 'mdi-chevron-down' : 'mdi-chevron-right'"
+                        size="small"
+                      />
+                    </v-btn>
+                    <span v-else class="expand-placeholder flex-shrink-0" />
                     <v-icon
                       :icon="item.node.IsGrouping ? 'mdi-folder' : 'mdi-file'"
                       size="small"
                       :color="item.node.IsGrouping ? 'warning' : 'info'"
                     />
-                    <span class="text-caption">{{ item.path }}</span>
+                    <span class="text-caption">{{ getNodeLabel(item) }}</span>
                   </div>
                 </template>
                 <template #item.Name="{ item }">{{ item.node.Name }}</template>
@@ -267,7 +307,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, watch } from 'vue'
+import { computed, inject, onMounted, ref, shallowRef, watch } from 'vue'
 import axios from '@/plugins/axios'
 import NDNodeEditDialog from '@/components/NDNodeEditDialog.vue'
 import { isAuthorizedKey, requestDataKeyKey } from '@/keys/dataKey'
@@ -276,12 +316,14 @@ import {
   addChildNode,
   applyNodeFields,
   createDefaultNode,
-  filterRows,
+  filterSearchVisibleRows,
+  filterVisibleRows,
   findRowById,
   flattenTree,
   normalizeHasHelp,
   parseLoadedData,
   removeNodeByIndexPath,
+  rowHasChildren,
   serializeRoots,
   syncHasHelpFromUrl,
   type FlatRow,
@@ -314,6 +356,7 @@ const createAsGroup = ref(false)
 const editingNode = ref<NDNode | null>(null)
 const editingRowId = ref<string | null>(null)
 const deleteDialog = ref(false)
+const collapsedRowIds = shallowRef<Set<string>>(new Set())
 
 const fileState = ref<Record<FileId, LoadedNDData>>({
   'NDToolsList.json': { roots: [], format: 'array' },
@@ -332,7 +375,13 @@ const headers = [
 ]
 
 const flatRows = computed(() => flattenTree(fileState.value[activeFile.value].roots))
-const filteredRows = computed(() => filterRows(flatRows.value, searchText.value))
+const searchQuery = computed(() => (searchText.value ?? '').trim())
+const displayRows = computed(() => {
+  const rows = flatRows.value
+  const query = searchQuery.value
+  if (query) return filterSearchVisibleRows(rows, query)
+  return filterVisibleRows(rows, collapsedRowIds.value)
+})
 const selectedRow = computed(() => {
   return selectedRowId.value ? findRowById(flatRows.value, selectedRowId.value) : undefined
 })
@@ -378,6 +427,43 @@ function onGroupingChange(isGrouping: boolean | null) {
   markDirty()
 }
 
+function getNodeDepth(row: FlatRow) {
+  return row.indexPath.length - 1
+}
+
+function getNodeLabel(row: FlatRow) {
+  return row.node.Name || row.node.SubPath || '未命名'
+}
+
+function isRowExpanded(row: FlatRow) {
+  if (searchQuery.value) return true
+  return !collapsedRowIds.value.has(row.rowId)
+}
+
+function toggleExpand(row: FlatRow) {
+  if (!rowHasChildren(row) || searchQuery.value) return
+  const next = new Set(collapsedRowIds.value)
+  if (next.has(row.rowId)) next.delete(row.rowId)
+  else next.add(row.rowId)
+  collapsedRowIds.value = next
+}
+
+function expandAll() {
+  collapsedRowIds.value = new Set()
+}
+
+function collapseAll() {
+  const ids = new Set<string>()
+  for (const row of flatRows.value) {
+    if (rowHasChildren(row)) ids.add(row.rowId)
+  }
+  collapsedRowIds.value = ids
+}
+
+function resetTreeExpandState() {
+  collapsedRowIds.value = new Set()
+}
+
 function getRowProps({ item }: { item: FlatRow }) {
   return {
     class: item.rowId === selectedRowId.value ? 'row-selected' : '',
@@ -414,6 +500,7 @@ async function loadFile(fileId: FileId) {
 async function loadCurrentFile() {
   dirty.value = false
   selectedRowId.value = ''
+  resetTreeExpandState()
   await loadFile(activeFile.value)
 }
 
@@ -459,6 +546,11 @@ function onNodeSubmit(node: NDNode) {
   const roots = fileState.value[activeFile.value].roots
   if (editMode.value === 'create') {
     addChildNode(roots, getParentIndexPath(), node)
+    if (createParentId.value) {
+      const next = new Set(collapsedRowIds.value)
+      next.delete(createParentId.value)
+      collapsedRowIds.value = next
+    }
     markDirty()
     return
   }
@@ -485,6 +577,7 @@ watch(activeFile, () => {
   searchText.value = ''
   selectedRowId.value = ''
   createParentId.value = ''
+  resetTreeExpandState()
   if (isAuthorized.value) {
     loadCurrentFile()
   }
@@ -535,5 +628,14 @@ onMounted(() => {
 
 :deep(.row-selected:hover) {
   background-color: rgba(var(--v-theme-primary), 0.2) !important;
+}
+
+.expand-btn {
+  width: 24px;
+  height: 24px;
+}
+
+.expand-placeholder {
+  width: 24px;
 }
 </style>
