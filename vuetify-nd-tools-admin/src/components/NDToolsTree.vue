@@ -21,6 +21,7 @@
     
   </v-sheet>
   <v-treeview
+    class="ndtools-tree"
     :items="filteredItems"
     :item-children="'Children'"
     :item-value="'PathId'"
@@ -38,11 +39,10 @@
         <v-icon v-else color="info" icon="mdi-file" >
         </v-icon>
     </template>
-    <template v-slot:subtitle="{ item }">
-        <span v-if="!item.IsGrouping" class="pa-3">
-            {{ item.message }}
-            <!-- {{`${item.StartupFolder}\\${item.SubPath}` }} -->
-        </span>
+    <template #subtitle="{ item }">
+      <span v-if="!item.IsGrouping && item.message" class="tree-node-message">
+        {{ item.message }}
+      </span>
     </template>
     <template v-slot:append="{ item }">
         <span v-if="!item.IsGrouping" class="pa-3">{{ `${item.StartupFolder}\\${item.SubPath}` }}</span>
@@ -229,4 +229,27 @@ async function onUpload(payload: any, callback: (result: { success: boolean, mes
     callback({ success: false, message: errorMessage })
   }
 }
-</script> 
+</script>
+
+<style scoped>
+.ndtools-tree :deep(.v-list-item) {
+  align-items: flex-start;
+}
+
+.ndtools-tree :deep(.v-list-item-subtitle) {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  opacity: 1;
+}
+
+.tree-node-message {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  max-width: min(72ch, 100%);
+}
+</style>
