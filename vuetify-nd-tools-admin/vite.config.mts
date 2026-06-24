@@ -52,7 +52,7 @@ export default defineConfig(({ command }) => ({
       '.vue',
     ],
   },
-  base: command === 'build' ? '/ndtoolsdata/' : '/',
+  base: command === 'build' ? '/ndtooldata/' : '/',
   server: {
     port: 3000,
     proxy: {
