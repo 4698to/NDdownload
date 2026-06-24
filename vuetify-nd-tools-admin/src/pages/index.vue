@@ -1,130 +1,215 @@
 <template>
-  <v-container fluid class="ma-0 pa-0">
-    <!-- <v-tabs v-model="tab" bg-color="primary" dark>
-      <v-tab value="installbox">天晴安装器资源包</v-tab>
-      <v-tab value="ndtools">盒子 - C3S3工具集</v-tab>
-      <v-tab value="ndtoolsall">盒子-全工具集</v-tab>
-    </v-tabs> -->
-    <v-window v-model="tab" class="mt-0">
+  <div class="browse-page">
+    <v-window v-model="tab">
       <v-window-item value="installbox">
-        <v-card>
+        <div v-if="tab === 'installbox'" class="browse-tab">
+          <header class="page-header">
+            <div class="page-header__text">
+              <h1 class="page-header__title text-h6 mb-1">
+                <v-icon icon="mdi-package-variant" color="primary" size="small" class="page-header__icon" />
+                天晴安装器资源包
+              </h1>
+              <p class="text-body-2 text-medium-emphasis page-header__lead">
+                一个工具安装全网的 3ds Max 插件，让我们一起来丰富工具库，方便所有人！
+              </p>
+            </div>
+            <div class="page-header__actions">
+              <v-btn
+                v-if="isAuthorized"
+                prepend-icon="mdi-pencil"
+                variant="tonal"
+                to="/installbox-edit"
+              >
+                编辑数据
+              </v-btn>
+              <v-btn
+                color="primary"
+                prepend-icon="mdi-file-upload-outline"
+                @click="requestUpload"
+              >
+                上传
+              </v-btn>
+            </div>
+          </header>
 
-          <v-card-title class="d-flex align-center">
-            <v-label >一个工具安装全网的3dsMax插件,让我们一起来丰富工具库,方便所有人！</v-label>
-            <v-spacer />
-            <v-btn v-if="isAuthorized" prepend-icon="mdi-pencil" variant="tonal" class="mr-2" to="/installbox-edit">编辑数据</v-btn>
-            <v-btn prepend-icon="mdi-file-upload-outline" @click="requestUpload">上传</v-btn>
-          </v-card-title>
-          <v-card-text>
-            <v-progress-circular v-if="loading" indeterminate color="primary" />
-            <v-alert v-else-if="error" type="error">{{ error }}</v-alert>
+          <section class="browse-content">
+            <div v-if="loading" class="browse-state browse-state--loading">
+              <v-progress-circular indeterminate color="primary" size="40" />
+            </div>
+            <v-alert v-else-if="error" type="error" variant="tonal" class="browse-alert">
+              {{ error }}
+            </v-alert>
+            <div v-else class="browse-tree-panel">
             <v-treeview
-              v-else
+              class="browse-tree"
               :items="rows"
               :open-all="false"
               :item-children="'child'"
               activatable
               hoverable
               open-on-click
+              density="compact"
+              color="primary"
             >
-            <template v-slot:title="{ item }">
-                <span class="pa-3">
-                    {{ item.zipname }}
+              <template #title="{ item }">
+                <span :class="{ 'tree-row-title--folder': hasChildren(item) }">
+                  {{ item.zipname }}
                 </span>
-            </template>
-            <template v-slot:prepend="{ item }">
-                <v-badge v-if="hasChildren(item)" color="info" :content="getChildCount(item)">
-                    <v-icon>mdi-folder</v-icon>
+              </template>
+              <template #prepend="{ item }">
+                <v-badge
+                  v-if="hasChildren(item)"
+                  color="info"
+                  :content="getChildCount(item)"
+                >
+                  <v-icon color="warning">mdi-folder</v-icon>
                 </v-badge>
-                <v-icon v-else color="info" icon="mdi-file" >
-                    <!-- <v-icon>mdi-file</v-icon> -->
-                </v-icon>
-            </template>
-            <template v-slot:subtitle="{ item }">
-                <span class="pa-3">
-                    {{ item.abouttext }}
+                <v-icon v-else color="info" icon="mdi-file" />
+              </template>
+              <template #subtitle="{ item }">
+                <span v-if="item.abouttext" class="tree-row-subtitle">
+                  {{ item.abouttext }}
                 </span>
-            </template>
-            <template v-slot:append="{ item }">
-                <v-chip v-if="item.dirpath" class="ml-2" :color="item.quick ? 'quick' : 'noquick'" variant="flat" style="max-width: 200px; min-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    {{ getitempath(item) }}
-                </v-chip>
-                <v-chip v-if="item.SeriesMin !== 0 && item.SeriesMax !== 0" class="ml-2">
-                   {{ item.SeriesMin }} - {{ item.SeriesMax }}
-                </v-chip>
-                <v-chip v-else class="ml-2">
-                    {{ SeriesMin }} - {{ SeriesMax }}
-                </v-chip>
-                <v-chip v-if="item.helplink" size="x-small" class="ml-2" >
-                    <a :href="item.helplink" target="_blank">
-                        <v-icon color="info">mdi-help-circle</v-icon>
-                    </a>
-                </v-chip>
-                <v-chip v-else  size="x-small" class="ml-2">
-                    <a target="_blank"><v-icon color="secondary">mdi-help-circle</v-icon></a>
-                </v-chip>
-                <v-chip size="x-small" class="ml-2">
-                    {{ formatDate(item.LastPackTime) }}
-                </v-chip>
-            </template>
-
+              </template>
+              <template #append="{ item }">
+                <div class="tree-row-meta">
+                  <v-chip
+                    v-if="item._displayPath"
+                    :color="item.quick ? 'quick' : 'noquick'"
+                    variant="flat"
+                    size="small"
+                    class="tree-path-chip"
+                    :class="item.quick ? 'tree-path-chip--quick' : 'tree-path-chip--standard'"
+                  >
+                    {{ item._displayPath }}
+                  </v-chip>
+                  <v-chip color="info" size="small" variant="tonal" class="tree-series-chip">
+                    <v-icon start icon="mdi-numeric" size="x-small" />
+                    {{ item._displaySeries }}
+                  </v-chip>
+                  <v-btn
+                    v-if="item.helplink"
+                    :href="item.helplink"
+                    target="_blank"
+                    icon
+                    variant="text"
+                    size="small"
+                    color="info"
+                    aria-label="查看帮助"
+                  >
+                    <v-icon>mdi-help-circle</v-icon>
+                  </v-btn>
+                  <v-icon v-else color="secondary" size="small" class="tree-row-meta__muted">
+                    mdi-help-circle-outline
+                  </v-icon>
+                  <span class="tree-row-meta__date text-caption text-medium-emphasis">
+                    {{ item._displayDate }}
+                  </span>
+                </div>
+              </template>
             </v-treeview>
-          </v-card-text>
-          <UploadDialog v-model="openUpload" @submit="onUpload" :title="`上传插件提交到【天晴安装器】资源包`"/>
-        </v-card>
+            </div>
+          </section>
+
+          <UploadDialog
+            v-model="openUpload"
+            title="上传插件提交到【天晴安装器】资源包"
+            @submit="onUpload"
+          />
+        </div>
       </v-window-item>
+
       <v-window-item value="ndtools">
-        <v-card>
-          <v-card-title class="d-flex align-center">
-            <v-label>C3S3 工具集数据</v-label>
-            <v-spacer />
-            <v-btn v-if="isAuthorized" prepend-icon="mdi-pencil" variant="tonal" @click="openEditNDToolsC3S3 = true">编辑数据</v-btn>
-          </v-card-title>
-          <v-card-text>
+        <div v-if="tab === 'ndtools'" class="browse-tab">
+          <header class="page-header">
+            <div class="page-header__text">
+              <h1 class="page-header__title text-h6 mb-1">
+                <v-icon icon="mdi-toolbox-outline" color="info" size="small" class="page-header__icon" />
+                C3S3 工具集
+              </h1>
+              <p class="text-caption text-medium-emphasis">NDToolsListC3S3.json</p>
+            </div>
+            <div class="page-header__actions">
+              <v-btn
+                v-if="isAuthorized"
+                prepend-icon="mdi-pencil"
+                variant="tonal"
+                @click="openEditNDToolsC3S3 = true"
+              >
+                编辑数据
+              </v-btn>
+            </div>
+          </header>
+
+          <section class="browse-content">
             <NDToolsTree :items="ndtoolsTree" />
-          </v-card-text>
-        </v-card>
+          </section>
+        </div>
       </v-window-item>
+
       <v-window-item value="ndtoolsall">
-        <v-card>
-          <v-card-title class="d-flex align-center">
-            <v-label>盒子全工具集数据</v-label>
-            <v-spacer />
-            <v-btn v-if="isAuthorized" prepend-icon="mdi-pencil" variant="tonal" @click="openEditNDTools = true">编辑数据</v-btn>
-          </v-card-title>
-          <v-card-text>
+        <div v-if="tab === 'ndtoolsall'" class="browse-tab">
+          <header class="page-header">
+            <div class="page-header__text">
+              <h1 class="page-header__title text-h6 mb-1">
+                <v-icon icon="mdi-view-list" color="warning" size="small" class="page-header__icon" />
+                盒子全工具集
+              </h1>
+              <p class="text-caption text-medium-emphasis">NDToolsList.json</p>
+            </div>
+            <div class="page-header__actions">
+              <v-btn
+                v-if="isAuthorized"
+                prepend-icon="mdi-pencil"
+                variant="tonal"
+                @click="openEditNDTools = true"
+              >
+                编辑数据
+              </v-btn>
+            </div>
+          </header>
+
+          <section class="browse-content">
             <NDToolsTree :items="ndtoolsAllTree" />
-          </v-card-text>
-        </v-card>
+          </section>
+        </div>
       </v-window-item>
     </v-window>
 
     <JsonEditDialog
+      v-if="openEditNDTools"
       v-model="openEditNDTools"
       file-id="NDToolsList.json"
       title="编辑 NDToolsList.json"
       @saved="onJsonSaved"
     />
     <JsonEditDialog
+      v-if="openEditNDToolsC3S3"
       v-model="openEditNDToolsC3S3"
       file-id="NDToolsListC3S3.json"
       title="编辑 NDToolsListC3S3.json"
       @saved="onJsonSaved"
     />
-  </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, inject, type Ref } from 'vue'
+import { ref, onMounted, watch, inject, defineAsyncComponent, type Ref } from 'vue'
 import axios from '@/plugins/axios'
-import NDToolsTree from '@/components/NDToolsTree.vue'
-import UploadDialog from '@/components/UploadDialog.vue'
-import JsonEditDialog from '@/components/JsonEditDialog.vue'
+import { downloadJson } from '@/utils/downloadJson'
+import {
+  enrichInstallBoxDisplay,
+  type InstallBoxItem,
+} from '@/utils/installBoxTree'
 import { requestDataKeyKey, isAuthorizedKey } from '@/keys/dataKey'
 import type { RequestDataKeyFn } from '@/keys/dataKey'
 
-const SeriesMin = 2015;
-const SeriesMax = 2025;
+const NDToolsTree = defineAsyncComponent(() => import('@/components/NDToolsTree.vue'))
+const UploadDialog = defineAsyncComponent(() => import('@/components/UploadDialog.vue'))
+const JsonEditDialog = defineAsyncComponent(() => import('@/components/JsonEditDialog.vue'))
+
+const SERIES_MIN = 2015
+const SERIES_MAX = 2025
 
 const injectedTab = inject<Ref<'installbox' | 'ndtools' | 'ndtoolsall'>>('activeTab')
 const requestDataKey = inject<RequestDataKeyFn>(requestDataKeyKey)!
@@ -132,10 +217,11 @@ const isAuthorized = inject(isAuthorizedKey)!
 const tab = injectedTab ?? ref<'installbox' | 'ndtools' | 'ndtoolsall'>('installbox')
 const loading = ref(true)
 const error = ref('')
-const headers = ref<string[]>([])
-const rows = ref<any[]>([])
+const rows = ref<InstallBoxItem[]>([])
 const ndtoolsTree = ref<any[]>([])
 const ndtoolsAllTree = ref<any[]>([])
+const ndtoolsLoaded = ref(false)
+const ndtoolsAllLoaded = ref(false)
 const openUpload = ref(false)
 const openEditNDTools = ref(false)
 const openEditNDToolsC3S3 = ref(false)
@@ -146,21 +232,7 @@ function requestUpload() {
   })
 }
 
-function collectAllKeys(arr: any[]): string[] {
-  const keys = new Set<string>()
-  function walk(items: any[]) {
-    for (const item of items) {
-      Object.keys(item).forEach(k => {
-        if (k !== 'child') keys.add(k)
-      })
-      if (Array.isArray(item.child)) walk(item.child)
-    }
-  }
-  walk(arr)
-  return Array.from(keys)
-}
-
-function normalizeChildren(arr: any[]): void {
+function normalizeChildren(arr: InstallBoxItem[]): void {
   for (const item of arr) {
     if (Array.isArray(item.child)) {
       normalizeChildren(item.child)
@@ -173,12 +245,12 @@ function normalizeChildren(arr: any[]): void {
   }
 }
 
-function hasChildren(item: any): boolean {
-  return Array.isArray(item?.child) && item.child.length > 0
+function hasChildren(item: InstallBoxItem): boolean {
+  return Array.isArray(item.child) && item.child.length > 0
 }
 
-function getChildCount(item: any): number {
-  return Array.isArray(item?.child) ? item.child.length : 0
+function getChildCount(item: InstallBoxItem): number {
+  return Array.isArray(item.child) ? item.child.length : 0
 }
 
 function normalizeNDChildren(arr: any[]): void {
@@ -193,90 +265,29 @@ function normalizeNDChildren(arr: any[]): void {
     }
   }
 }
-function getitempath(item: any) {
-    if (item.type === 0) {
-        return item.dirpath
-    } else {
-        if (item.dirpath) {
-            return  `ApplicationPlugins/${item.dirpath}`
-        } else {
-            return item.targetpath
-        }
-    }
-}
-// 提取节点主标题
-function itemTitle(item: any) {
-  // 优先显示 zipname，其次 abouttext，否则显示 targetpath
-  return item.zipname || item.abouttext || item.targetpath || '未命名'
-}
-
-function formatDate(val: string | number) {
-  function toYMDHM(date: Date) {
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, '0')
-    const d = String(date.getDate()).padStart(2, '0')
-    const h = String(date.getHours()).padStart(2, '0')
-    const min = String(date.getMinutes()).padStart(2, '0')
-    return `${y}-${m}-${d} ${h}:${min}`
-  }
-  if (!val) return toYMDHM(new Date())
-  // 支持 /Date(1749813715000+0800)/ 格式
-  if (typeof val === 'string' && val.startsWith('/Date(')) {
-    const match = val.match(/\/Date\((\-?\d+)([+-]\d+)?\)\//)
-    if (match) {
-      const ms = parseInt(match[1], 10)
-      if (ms <= -62135596800000) return toYMDHM(new Date())
-      const date = new Date(ms)
-      if (date.getFullYear() < 1970) return toYMDHM(new Date())
-      return toYMDHM(date)
-    }
-    return toYMDHM(new Date())
-  }
-  // 普通时间戳
-  const num = typeof val === 'string' ? parseInt(val, 10) : val
-  if (!isNaN(num) && num > 1000000000000) {
-    const date = new Date(num)
-    if (date.getFullYear() < 1970) return toYMDHM(new Date())
-    return toYMDHM(date)
-  }
-  return toYMDHM(new Date())
-}
 
 async function getdata() {
   try {
     loading.value = true
     error.value = ''
-    //const res = await axios.get('/download?fileid=InstallBox_version_full.json')
-    const res = await axios.get('/download?fileid=InstallBox_version_full.json')
+    const data = await downloadJson('InstallBox_version_full.json') as Record<string, unknown>
 
-    let data: any = res.data
-    if (typeof data === 'string') {
-      try {
-        const trimmed = data.replace(/^\uFEFF/, '').trim()
-        data = JSON.parse(trimmed)
-      } catch (e) {
-        error.value = '返回的不是有效的 JSON 数据'
-        rows.value = []
-        return
-      }
-    }
-
-    const items: any[] = Array.isArray(data?.item)
-      ? data.item
+    const items: InstallBoxItem[] = Array.isArray(data?.item)
+      ? data.item as InstallBoxItem[]
       : Array.isArray(data)
-        ? data
+        ? data as InstallBoxItem[]
         : []
 
-    if (Array.isArray(items) && items.length >= 0) {
-      normalizeChildren(items)
-      headers.value = collectAllKeys(items)
-      rows.value = items
+    normalizeChildren(items)
+    enrichInstallBoxDisplay(items, SERIES_MIN, SERIES_MAX)
+    rows.value = items
+  } catch (e: unknown) {
+    const err = e as { message?: string }
+    if (e instanceof SyntaxError) {
+      error.value = '返回的不是有效的 JSON 数据'
     } else {
-      error.value = '数据格式不正确'
-      rows.value = []
+      error.value = err?.message || '未知错误'
     }
-  } catch (e: any) {
-    error.value = e?.message || '未知错误'
     rows.value = []
   } finally {
     loading.value = false
@@ -284,61 +295,46 @@ async function getdata() {
 }
 
 async function loadNDToolsTree() {
+  if (ndtoolsLoaded.value) return
   try {
-    const res = await axios.get('/download?fileid=NDToolsListC3S3.json')
-    let data: any = res.data
-    if (typeof data === 'string') {
-      try {
-        const trimmed = data.replace(/^\uFEFF/, '').trim()
-        data = JSON.parse(trimmed)
-      } catch (e) {
-        ndtoolsTree.value = []
-        return
-      }
-    }
+    const data = await downloadJson('NDToolsListC3S3.json')
     const items: any[] = Array.isArray(data) ? data : [data]
     normalizeNDChildren(items)
     ndtoolsTree.value = items
-  } catch (e) {
+    ndtoolsLoaded.value = true
+  } catch {
     ndtoolsTree.value = []
   }
 }
 
 async function loadNDToolsAllTree() {
+  if (ndtoolsAllLoaded.value) return
   try {
-    const res = await axios.get('/download?fileid=NDToolsList.json')
-    let data: any = res.data
-    if (typeof data === 'string') {
-      try {
-        const trimmed = data.replace(/^\uFEFF/, '').trim()
-        data = JSON.parse(trimmed)
-      } catch (e) {
-        ndtoolsAllTree.value = []
-        return
-      }
-    }
+    const data = await downloadJson('NDToolsList.json')
     const items: any[] = Array.isArray(data) ? data : [data]
     normalizeNDChildren(items)
     ndtoolsAllTree.value = items
-  } catch (e) {
+    ndtoolsAllLoaded.value = true
+  } catch {
     ndtoolsAllTree.value = []
   }
 }
 
-onMounted(async () => {
-    await getdata();
-    await loadNDToolsTree()
-    await loadNDToolsAllTree()
+watch(tab, (value) => {
+  if (value === 'ndtools') void loadNDToolsTree()
+  if (value === 'ndtoolsall') void loadNDToolsAllTree()
 })
 
-const headersForDataTable = computed(() =>
-  headers.value.map(h => ({ text: h, value: h }))
-)
+onMounted(() => {
+  void getdata()
+})
 
 async function onJsonSaved(fileId: string) {
   if (fileId === 'NDToolsList.json') {
+    ndtoolsAllLoaded.value = false
     await loadNDToolsAllTree()
   } else if (fileId === 'NDToolsListC3S3.json') {
+    ndtoolsLoaded.value = false
     await loadNDToolsTree()
   }
 }
@@ -385,3 +381,171 @@ async function onUpload(payload: any, callback: (result: { success: boolean, mes
   }
 }
 </script>
+
+<style scoped>
+.browse-page {
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --browse-primary-wash: rgba(var(--v-theme-primary), 0.06);
+  --browse-surface-border: rgba(var(--v-border-color), var(--v-border-opacity));
+  padding: var(--space-md);
+}
+
+@media (min-width: 960px) {
+  .browse-page {
+    padding: var(--space-lg);
+  }
+}
+
+.browse-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--browse-surface-border);
+}
+
+.page-header__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.page-header__icon {
+  flex-shrink: 0;
+  opacity: 0.92;
+}
+
+.page-header__lead {
+  max-width: 65ch;
+  text-wrap: pretty;
+}
+
+.page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.browse-content {
+  min-height: 200px;
+}
+
+.browse-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 240px;
+  padding: var(--space-xl);
+  border-radius: 4px;
+}
+
+.browse-state--loading {
+  background: var(--browse-primary-wash);
+  border: 1px solid var(--browse-surface-border);
+}
+
+.browse-alert {
+  border: 1px solid rgba(var(--v-theme-error), 0.24);
+}
+
+.browse-tree-panel {
+  border: 1px solid var(--browse-surface-border);
+  border-radius: 4px;
+  background: rgb(var(--v-theme-surface));
+  overflow: hidden;
+}
+
+.browse-tree :deep(.v-treeview-item) {
+  border-bottom: 1px solid rgba(var(--v-border-color), calc(var(--v-border-opacity) * 0.6));
+  content-visibility: auto;
+  contain-intrinsic-size: auto 48px;
+  transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.browse-tree :deep(.v-treeview-item--active) {
+  background: rgba(var(--v-theme-primary), 0.12);
+}
+
+.browse-tree :deep(.v-treeview-item:hover:not(.v-treeview-item--active)) {
+  background: rgba(var(--v-theme-primary), 0.04);
+}
+
+.tree-row-title--folder {
+  font-weight: 500;
+}
+
+.tree-row-subtitle {
+  display: block;
+  max-width: 48ch;
+  text-wrap: pretty;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
+
+.tree-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  max-width: min(100%, 520px);
+}
+
+.tree-path-chip {
+  max-width: 200px;
+}
+
+.tree-path-chip :deep(.v-chip__content) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-path-chip--quick :deep(.v-chip__content) {
+  color: rgb(13, 71, 161);
+}
+
+.tree-path-chip--standard :deep(.v-chip__content) {
+  color: rgb(62, 56, 0);
+}
+
+.v-theme--dark .tree-path-chip--quick :deep(.v-chip__content) {
+  color: rgb(187, 222, 251);
+}
+
+.v-theme--dark .tree-path-chip--standard :deep(.v-chip__content) {
+  color: rgb(255, 249, 196);
+}
+
+.tree-series-chip :deep(.v-icon) {
+  opacity: 0.85;
+}
+
+.tree-row-meta__date {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tree-row-meta__muted {
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browse-tree :deep(.v-treeview-item) {
+    transition: none;
+  }
+}
+</style>

@@ -4,6 +4,15 @@
       <v-card-title>{{ titleText }}</v-card-title>
       <v-card-text>
         <v-row dense>
+          <v-col v-if="mode === 'create'" cols="12">
+            <v-select
+              v-model="parentIdModel"
+              :items="parentOptions"
+              label="新建到"
+              variant="outlined"
+              density="comfortable"
+            />
+          </v-col>
           <v-col cols="12" sm="6">
             <v-text-field v-model="form.zipname" label="zipname" variant="outlined" density="comfortable" />
           </v-col>
@@ -23,7 +32,15 @@
             <v-text-field v-model="form.dirpath" label="dirpath" variant="outlined" density="comfortable" />
           </v-col>
           <v-col cols="4">
-            <v-text-field v-model.number="form.type" label="type" type="number" variant="outlined" density="comfortable" />
+            <v-select
+              v-model="form.type"
+              :items="DIR_TYPE_OPTIONS"
+              item-title="title"
+              item-value="value"
+              label="type"
+              variant="outlined"
+              density="comfortable"
+            />
           </v-col>
           <v-col cols="4">
             <v-text-field v-model.number="form.SeriesMin" label="SeriesMin" type="number" variant="outlined" density="comfortable" />
@@ -62,19 +79,29 @@
 
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
-import { cloneItem, createDefaultItem, type InstallBoxItem } from '@/utils/installBoxTree'
+import { cloneItem, createDefaultItem, DIR_TYPE_OPTIONS, type InstallBoxItem } from '@/utils/installBoxTree'
 
 const props = defineProps<{
   modelValue: boolean
   mode: 'create' | 'edit'
   node?: InstallBoxItem | null
   isParent?: boolean
+  parentId?: string
+  parentOptions?: { title: string; value: string }[]
 }>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void
+  (e: 'update:parentId', v: string): void
   (e: 'submit', node: InstallBoxItem): void
 }>()
+
+const parentIdModel = computed({
+  get: () => props.parentId ?? '',
+  set: (v: string) => emit('update:parentId', v),
+})
+
+const parentOptions = computed(() => props.parentOptions ?? [{ title: '（根级）', value: '' }])
 
 const internalOpen = computed({
   get: () => props.modelValue,

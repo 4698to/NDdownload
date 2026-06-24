@@ -72,9 +72,11 @@
     <v-main>
       <router-view />
     </v-main>
-
-    <DataKeyDialog v-model="showKeyDialog" @verified="onKeyVerified" />
   </v-app>
+
+  <Teleport to="body">
+    <DataKeyDialog v-model="showKeyDialog" @verified="onKeyVerified" />
+  </Teleport>
 </template>
 
 <script lang="ts" setup>
@@ -111,7 +113,7 @@ provide(requestDataKeyKey, requestDataKey)
 provide(isAuthorizedKey, isAuthorized)
 
 function onKeyVerified() {
-  isAuthorized.value = true
+  isAuthorized.value = hasDataKey()
   pendingCallback?.()
   pendingCallback = null
 }

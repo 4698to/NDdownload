@@ -1,5 +1,12 @@
 <template>
-  <v-dialog v-model="internalOpen" persistent max-width="480">
+  <v-dialog
+    v-model="internalOpen"
+    persistent
+    max-width="480"
+    scroll-strategy="none"
+    :retain-focus="false"
+    @after-enter="focusInput"
+  >
     <v-card>
       <v-card-title class="d-flex align-center">
         <v-icon icon="mdi-key" class="mr-2" />
@@ -10,12 +17,12 @@
           编辑或上传数据需要 NDTOOLDATAKEY，请输入后验证。
         </p>
         <v-text-field
+          ref="keyInputRef"
           v-model="keyInput"
           label="NDTOOLDATAKEY"
           type="password"
           variant="outlined"
           density="comfortable"
-          autofocus
           :disabled="verifying"
           @keyup.enter="onVerify"
         />
@@ -33,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import axios from '@/plugins/axios'
 import { setDataKey } from '@/utils/dataKey'
 
@@ -52,8 +59,14 @@ const internalOpen = computed({
 })
 
 const keyInput = ref('')
+const keyInputRef = ref<{ focus: () => void } | null>(null)
 const verifying = ref(false)
 const errorMessage = ref('')
+
+async function focusInput() {
+  await nextTick()
+  keyInputRef.value?.focus()
+}
 
 async function onVerify() {
   errorMessage.value = ''
@@ -64,13 +77,15 @@ async function onVerify() {
   }
 
   verifying.value = true
-  setDataKey(key)
+  errorMessage.value = ''
   try {
-    await axios.post('/auth/verify')
+    await axios.post('/auth/verify', {}, {
+      headers: { 'X-NDTools-Data-Key': key },
+    })
+    setDataKey(key)
     internalOpen.value = false
     emit('verified')
   } catch (e: any) {
-    setDataKey('')
     errorMessage.value = e?.response?.data?.error || e?.response?.data?.message || '密钥验证失败'
   } finally {
     verifying.value = false

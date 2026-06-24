@@ -18,10 +18,173 @@ export type InstallBoxItem = {
   ischange?: boolean
   LastWriteTime?: string
   LastPackTime?: string
+  /** 浏览页预计算展示字段（仅 UI，不写入发布 JSON） */
+  _displayPath?: string
+  _displayDate?: string
+  _displaySeries?: string
   [key: string]: unknown
 }
 
 export type InstallBoxMeta = Record<string, unknown>
+
+export const DIR_TYPE_OPTIONS = [
+  { title: 'MaxRoot（Max 安装目录子路径）', value: 0 },
+  { title: 'Application（ApplicationPlugins）', value: 1 },
+] as const
+
+export const DIR_TYPE_LABELS: Record<number, string> = {
+  0: 'MaxRoot',
+  1: 'Application',
+}
+
+export function formatDirType(type: unknown): string {
+  if (type === null || type === undefined || type === '') return 'MaxRoot'
+  const num = Number(type)
+  return DIR_TYPE_LABELS[num] ?? String(type)
+}
+
+export function getInstallBoxItemPath(item: InstallBoxItem): string {
+  if (item.type === 0) {
+    return item.dirpath ?? ''
+  }
+  if (item.dirpath) {
+    return `ApplicationPlugins/${item.dirpath}`
+  }
+  return item.targetpath ?? ''
+}
+
+/** 一次性预计算树节点展示字段，避免模板内重复格式化 */
+export function enrichInstallBoxDisplay(
+  items: InstallBoxItem[],
+  seriesMin: number,
+  seriesMax: number,
+): void {
+  for (const item of items) {
+    if (item.dirpath) {
+      item._displayPath = getInstallBoxItemPath(item)
+    }
+    item._displayDate = formatMsDate(item.LastPackTime)
+    const min = item.SeriesMin ?? 0
+    const max = item.SeriesMax ?? 0
+    item._displaySeries =
+      min !== 0 && max !== 0 ? `${min} - ${max}` : `${seriesMin} - ${seriesMax}`
+    if (Array.isArray(item.child)) {
+      enrichInstallBoxDisplay(item.child, seriesMin, seriesMax)
+    }
+  }
+}
+
+export function stripDevFields(item: InstallBoxItem): InstallBoxItem {
+  const result = cloneItem(item)
+  delete result.targetpath
+  delete result.savepath
+  if (Array.isArray(result.child)) {
+    result.child = result.child.map(stripDevFields)
+  } else if (!result.isParent) {
+    result.child = null
+  }
+  return result
+}
+
+export function buildParentFromScan(parent: InstallBoxItem, children: InstallBoxItem[]): InstallBoxItem {
+  return {
+    ...cloneItem(parent),
+    isParent: true,
+    child: children.map(c => cloneItem(c)),
+  }
+}
+
+export function syncVersionMeta(meta: InstallBoxMeta, version: string, lastPack?: string): InstallBoxMeta {
+  const next: InstallBoxMeta = { ...meta, Version: version, _version: version }
+  if (lastPack) {
+    next.LastPack = lastPack
+    next._lastPack = lastPack
+  }
+  return next
+}
+
+export function getVersionRaise(meta: InstallBoxMeta): boolean {
+  if (typeof meta.is_version_raise === 'boolean') return meta.is_version_raise
+  if (typeof meta.version_raise === 'boolean') return meta.version_raise
+  return true
+}
+
+export function setVersionRaise(meta: InstallBoxMeta, value: boolean): void {
+  meta.is_version_raise = value
+  meta.version_raise = value
+}
+
+export function previewNextVersion(meta: InstallBoxMeta, versionRaise: boolean): string {
+  const raw = String(meta.Version ?? meta._version ?? '1.0')
+  const num = Number.parseFloat(raw)
+  const base = Number.isFinite(num) ? num : 1.0
+  if (!versionRaise) return raw
+  return (Math.round((base + 0.01) * 100) / 100).toString()
+}
+
+export function countPackLeaves(items: InstallBoxItem[]): number {
+  let count = 0
+  function walk(nodes: InstallBoxItem[]) {
+    for (const node of nodes) {
+      if (!node || typeof node !== 'object') continue
+      const children = Array.isArray(node.child) ? node.child : []
+      if (node.isParent && children.length > 0) {
+        for (const child of children) {
+          if (child && !child.isParent && needsPackFileCheck(child)) count += 1
+        }
+      } else if (needsPackFileCheck(node)) {
+        count += 1
+      }
+    }
+  }
+  walk(items)
+  return count
+}
+
+export function truncateSha(sha: string | null | undefined, max = 12): string {
+  if (!sha) return '—'
+  return sha.length <= max ? sha : `${sha.slice(0, max)}…`
+}
+
+const MS_DATE_EPOCH = -62135596800000
+
+function toYmdHm(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  const h = String(date.getHours()).padStart(2, '0')
+  const min = String(date.getMinutes()).padStart(2, '0')
+  return `${y}-${m}-${d} ${h}:${min}`
+}
+
+/** 将 Newtonsoft `/Date(ms)/` 或毫秒时间戳格式化为本地时间 */
+export function formatMsDate(
+  val: string | number | null | undefined,
+  emptyLabel = '—',
+): string {
+  if (val === null || val === undefined || val === '') return emptyLabel
+
+  if (typeof val === 'string' && val.startsWith('/Date(')) {
+    const match = val.match(/\/Date\((-?\d+)(?:[+-]\d+)?\)\//)
+    if (match) {
+      const ms = Number.parseInt(match[1], 10)
+      if (ms <= MS_DATE_EPOCH) return emptyLabel
+      const date = new Date(ms)
+      if (date.getFullYear() < 1970) return emptyLabel
+      return toYmdHm(date)
+    }
+    return emptyLabel
+  }
+
+  const num = typeof val === 'string' ? Number.parseInt(val, 10) : val
+  if (Number.isFinite(num) && num > MS_DATE_EPOCH) {
+    const date = new Date(num)
+    if (date.getFullYear() < 1970) return emptyLabel
+    return toYmdHm(date)
+  }
+
+  return emptyLabel
+}
 
 export type LoadedInstallBoxData = {
   meta: InstallBoxMeta

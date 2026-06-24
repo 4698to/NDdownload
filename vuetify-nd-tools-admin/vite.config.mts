@@ -2,7 +2,6 @@
 import Components from 'unplugin-vue-components/vite'
 import Vue from '@vitejs/plugin-vue'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-import Fonts from 'unplugin-fonts/vite'
 import VueRouter from 'unplugin-vue-router/vite'
 
 // Utilities
@@ -10,7 +9,7 @@ import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     VueRouter({
       dts: 'src/typed-router.d.ts',
@@ -27,17 +26,6 @@ export default defineConfig({
     }),
     Components({
       dts: 'src/components.d.ts',
-    }),
-    Fonts({
-      fontsource: {
-        families: [
-          {
-            name: 'Roboto',
-            weights: [100, 300, 400, 500, 700, 900],
-            styles: ['normal', 'italic'],
-          },
-        ],
-      },
     }),
   ],
   optimizeDeps: {
@@ -64,9 +52,7 @@ export default defineConfig({
       '.vue',
     ],
   },
-  //base: '/ndtooldata/',
-  base: '/',
-
+  base: command === 'build' ? '/ndtoolsdata/' : '/',
   server: {
     port: 3000,
     proxy: {
@@ -89,4 +75,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

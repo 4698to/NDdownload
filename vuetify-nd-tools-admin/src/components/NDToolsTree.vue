@@ -137,9 +137,12 @@ function attachPathId(nodes: NDNode[], parentId = ''): NDNode[] {
   return list
 }
 
+const itemsWithPathId = computed(() => attachPathId(props.items || []))
+
 const filteredItems = computed(() => {
-  const base = filterTree(props.items || [], searchText.value.trim())
-  return attachPathId(base)
+  const q = searchText.value.trim()
+  if (!q) return itemsWithPathId.value
+  return attachPathId(filterTree(props.items || [], q))
 })
 
 const userOpened = ref<string[]>([])

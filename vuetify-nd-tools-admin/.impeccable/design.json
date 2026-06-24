@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-10T00:00:00.000Z",
+  "title": "Design System: 天晴动作组工具集管理端",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "晴工具蓝",
+        "canonical": "#1976D2",
+        "tonalRamp": ["#0D47A1", "#1565C0", "#1976D2", "#1E88E5", "#42A5F5", "#64B5F6", "#90CAF9", "#BBDEFB"]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "画布白",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#212121", "#424242", "#616161", "#757575", "#9E9E9E", "#BDBDBD", "#E0E0E0", "#FFFFFF"]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "浮层灰",
+        "canonical": "#1E1E1E",
+        "tonalRamp": ["#000000", "#121212", "#1E1E1E", "#2C2C2C", "#383838", "#444444", "#505050", "#616161"]
+      },
+      "success": {
+        "role": "semantic",
+        "displayName": "成功绿",
+        "canonical": "#4CAF50",
+        "tonalRamp": ["#1B5E20", "#2E7D32", "#388E3C", "#43A047", "#4CAF50", "#66BB6A", "#81C784", "#C8E6C9"]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "警示橙",
+        "canonical": "#FB8C00",
+        "tonalRamp": ["#E65100", "#EF6C00", "#F57C00", "#FB8C00", "#FF9800", "#FFB74D", "#FFCC80", "#FFE0B2"]
+      },
+      "error": {
+        "role": "semantic",
+        "displayName": "错误红",
+        "canonical": "#FF5252",
+        "tonalRamp": ["#B71C1C", "#C62828", "#D32F2F", "#E53935", "#F44336", "#FF5252", "#EF9A9A", "#FFCDD2"]
+      },
+      "info": {
+        "role": "semantic",
+        "displayName": "信息蓝",
+        "canonical": "#2196F3",
+        "tonalRamp": ["#0D47A1", "#1565C0", "#1976D2", "#1E88E5", "#2196F3", "#42A5F5", "#64B5F6", "#BBDEFB"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "页面标题", "purpose": "页面级 h6 标题，如资源包名称" },
+      "title": { "displayName": "区块标题", "purpose": "侧栏、卡片标题、面板标题" },
+      "body": { "displayName": "正文", "purpose": "表格、表单、树节点说明" },
+      "label": { "displayName": "辅助标签", "purpose": "caption、状态 chip、时间戳" }
+    },
+    "shadows": [
+      {
+        "name": "app-bar",
+        "value": "0 2px 4px rgba(0, 0, 0, 0.14)",
+        "purpose": "仅顶栏 elevation-4，分隔导航与内容"
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Vuetify 默认过渡，状态反馈 150–250ms"
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "600px" },
+      { "name": "md", "value": "960px" },
+      { "name": "lg", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "主操作：保存、发布、输入密钥",
+      "html": "<button class=\"ds-btn-primary\">保存</button>",
+      "css": ".ds-btn-primary { background: #1976D2; color: #fff; padding: 8px 16px; font-family: system-ui, 'Microsoft YaHei', 'PingFang SC', sans-serif; font-size: 0.875rem; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: #1565C0; } .ds-btn-primary:focus-visible { outline: 2px solid #1976D2; outline-offset: 2px; }"
+    },
+    {
+      "name": "Tonal Button",
+      "kind": "button",
+      "refersTo": "button-tonal",
+      "description": "次要操作：重新加载、新建、编辑",
+      "html": "<button class=\"ds-btn-tonal\">重新加载</button>",
+      "css": ".ds-btn-tonal { background: rgba(25, 118, 210, 0.12); color: #1976D2; padding: 8px 12px; font-family: system-ui, 'Microsoft YaHei', 'PingFang SC', sans-serif; font-size: 0.875rem; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s; } .ds-btn-tonal:hover { background: rgba(25, 118, 210, 0.18); } .ds-btn-tonal:focus-visible { outline: 2px solid #1976D2; outline-offset: 2px; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip-status",
+      "description": "全局状态栏：发布预览、检查结果",
+      "html": "<span class=\"ds-chip-status\">发布预览：1.48 → 1.49</span>",
+      "css": ".ds-chip-status { display: inline-block; background: rgba(33, 150, 243, 0.12); color: #1976D2; padding: 4px 8px; font-family: system-ui, 'Microsoft YaHei', sans-serif; font-size: 0.75rem; font-weight: 500; border-radius: 4px; }"
+    },
+    {
+      "name": "Outlined Input",
+      "kind": "input",
+      "refersTo": "input-outlined",
+      "description": "管理页紧凑表单字段",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">packpath</span><input class=\"ds-input\" type=\"text\" placeholder=\"资源包目录\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; font-family: system-ui, 'Microsoft YaHei', sans-serif; } .ds-field-label { font-size: 0.75rem; color: #757575; } .ds-input { padding: 8px 12px; font-size: 0.875rem; border: 1px solid rgba(0,0,0,0.38); border-radius: 4px; background: #fff; transition: border-color 0.2s; } .ds-input:focus { outline: none; border-color: #1976D2; border-width: 2px; padding: 7px 11px; }"
+    },
+    {
+      "name": "Tonal Alert",
+      "kind": "custom",
+      "refersTo": "alert-tonal",
+      "description": "警告/错误/成功状态提示",
+      "html": "<div class=\"ds-alert ds-alert-warning\">请先在全局配置中填写 packpath</div>",
+      "css": ".ds-alert { padding: 12px 16px; border-radius: 4px; font-family: system-ui, 'Microsoft YaHei', sans-serif; font-size: 0.875rem; } .ds-alert-warning { background: rgba(251, 140, 0, 0.12); color: #E65100; }"
+    },
+    {
+      "name": "Side Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "管理页侧栏导航项",
+      "html": "<a class=\"ds-nav-item ds-nav-item-active\" href=\"#\"><span class=\"ds-nav-icon\">📦</span>天晴安装器</a>",
+      "css": ".ds-nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 12px; font-family: system-ui, 'Microsoft YaHei', sans-serif; font-size: 0.875rem; color: #424242; text-decoration: none; transition: background 0.2s; } .ds-nav-item:hover { background: rgba(0,0,0,0.04); } .ds-nav-item-active { background: rgba(25, 118, 210, 0.12); color: #1976D2; font-weight: 500; }"
+    },
+    {
+      "name": "Data Table Row Selected",
+      "kind": "custom",
+      "refersTo": "table-row-selected",
+      "description": "installbox-edit 表格选中行",
+      "html": "<tr class=\"ds-table-row ds-table-row-selected\"><td>C3_Export_Script</td><td>导出助手</td></tr>",
+      "css": ".ds-table-row { font-family: system-ui, 'Microsoft YaHei', sans-serif; font-size: 0.875rem; } .ds-table-row td { padding: 8px 12px; border-bottom: 1px solid rgba(0,0,0,0.08); } .ds-table-row-selected { background: rgba(25, 118, 210, 0.14); } .ds-table-row-selected:hover { background: rgba(25, 118, 210, 0.2); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "清晰工位",
+    "overview": "面向内网资源浏览与维护的产品界面：公众查阅工具目录，编辑者完成打包发布。在 Vuetify Material 3 之上做克制优化——熟悉、可信、不压迫。动效仅用于状态反馈。",
+    "keyCharacteristics": [
+      "Restrained 配色：蓝色主色仅用于主操作与选中",
+      "系统字体：微软雅黑 / 苹方，无 Web 字体",
+      "紧凑但不拥挤：compact 管理页 + comfortable 对话框",
+      "诚实的状态反馈：tonal alert/chip 直白呈现运维状态",
+      "深浅色双主题跟随系统"
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "主色蓝仅用于可点击的主操作与当前导航选中。禁止用主色大面积铺底或装饰性描边。", "section": "colors" },
+      { "name": "The Semantic-Only Rule", "body": "success/warning/error/info 只表达状态，不用于品牌装饰。", "section": "colors" },
+      { "name": "The System Font Rule", "body": "禁止引入 Roboto 或其他 Web 字体作为正文字体；保持系统栈。", "section": "typography" },
+      { "name": "The Density Type Rule", "body": "管理表格与侧栏用 compact；对话框表单用 comfortable。", "section": "typography" },
+      { "name": "The Flat Surface Rule", "body": "卡片、表格容器、侧栏默认无 drop shadow。需要分隔时用 border 或 tonal 背景。", "section": "elevation" },
+      { "name": "The No Ghost Card Rule", "body": "禁止 1px border 与 box-shadow blur ≥16px 同时出现在同一元素上。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 用 variant=\"tonal\" 的 chip/alert 传达状态，保持主内容区留白",
+      "Do 危险操作（删除、发布）前用确认对话框",
+      "Do 管理页统一 density=\"compact\"，对话框 comfortable",
+      "Do 尊重 prefers-reduced-motion，过渡限于 150–250ms 状态反馈",
+      "Do 侧栏 + 主工作区 + 可选右侧编辑面板的三栏布局"
+    ],
+    "donts": [
+      "Don't 做成密密麻麻的企业后台：无层次、无呼吸感的信息墙",
+      "Don't 一屏堆满 alert/chip/按钮、缺乏主次",
+      "Don't 使用渐变文字、玻璃拟态卡片墙、无意义动效等装饰性 UI",
+      "Don't 用 border-left 粗色条作为卡片装饰",
+      "Don't 在 inactive 状态使用高饱和主色",
+      "Don't 引入 Web 字体导致打包体积膨胀与 preload 泛滥"
+    ]
+  }
+}
