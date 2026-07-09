@@ -7,8 +7,8 @@ using System.Windows;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("天晴盒子安装程序内网_99U：199505")]
-[assembly: AssemblyDescription("天晴盒子安装程序内网_99U：199505")]
+[assembly: AssemblyTitle("天晴盒子安装程序-内网渠道")]
+[assembly: AssemblyDescription("天晴盒子安装程序-内网渠道 (NDDownloadIn.exe)")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ND")]
 [assembly: AssemblyProduct("NDDownload")]

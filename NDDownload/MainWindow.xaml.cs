@@ -31,15 +31,12 @@ namespace NDDownload
             // sundaybox.cc 服务器版本
             InitializeComponent();
             
-            _installtree = new InstallViewModel(GetInstallitem.GetMax(), ResourcesUrl.serverName2);
-            _installtree.title = ResourcesUrl.Windowtitle2;
-
-            //_installtree.ShowGif = "./imgae/20171005141703.gif";
+            _installtree = new InstallViewModel(GetInstallItem.GetMax());
+            InstallChannel.ApplyFixedServerToViewModel(_installtree);
             _installtree.ShowGif = ResourcesUrl.GetShowGif();
-
-            //}
             this.DataContext = _installtree;
-            
+            this.Title = _installtree.WindowTitle;
+
             _installtree.Start();//下载服务器上内容清单，
 
             _installtree.GetScriptPath();//获取用户配置的自定义脚本文件夹
@@ -56,7 +53,7 @@ namespace NDDownload
             string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
             // 快捷方式的目标路径（你要创建快捷方式的应用程序路径）
-            string targetPath = @"C:\ProgramData\Autodesk\ApplicationPlugins\NDToolsBox\NDDownload.exe";
+            string targetPath = InstallChannel.GetInstalledExePath();
             if (System.IO.File.Exists(targetPath))
             {
                 string short_path = System.IO.Path.Combine(desktopPath, "天晴盒子.lnk");
@@ -195,23 +192,14 @@ namespace NDDownload
                 if (parent != null)
                 {
                     Grid panel = parent as Grid;
-                    if (panel != null)
+                    var scriptPath = panel?.DataContext as ScriptCollectPathsViewModel;
+                    if (scriptPath != null)
                     {
-                        try
-                        {
-                            _installtree.ScriptPaths.Remove(panel.DataContext as ScriptCollectPathsViewModel);
-                        }
-                        catch { }
+                        _installtree.ScriptPaths.Remove(scriptPath);
                     }
                 }
             }
         }
-
-        //private void RadioButton_Checked(object sender, RoutedEventArgs e)
-        //{
-        //    this.Title = _installtree.WindowTitle;
-        //    _installtree.Start();
-        //}
 
         private void Button_select_path_Click(object sender, RoutedEventArgs e)
         {
@@ -311,13 +299,10 @@ namespace NDDownload
                 if (parent != null)
                 {
                     Grid panel = parent as Grid;
-                    if (panel != null)
+                    var xmlPath = panel?.DataContext as ScriptCollectPathsViewModel;
+                    if (xmlPath != null)
                     {
-                        try
-                        {
-                            _installtree.XMLPaths.Remove(panel.DataContext as ScriptCollectPathsViewModel);
-                        }
-                        catch { }
+                        _installtree.XMLPaths.Remove(xmlPath);
                     }
                 }
             }

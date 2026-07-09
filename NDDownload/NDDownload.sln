@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NDDownload.Core", "..\NDDownload.Core\NDDownload.Core.csproj", "{B8E4F3A1-2C5D-4E9F-9A1B-3D7C6E8F0A2D}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NDDownload", "NDDownload.csproj", "{2402F118-D088-415E-BF03-C24E2374496B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsWPF", "..\SettingsWPF\SettingsWPF.csproj", "{34D5E069-3325-4132-A9F4-D7BE711D64C2}"
@@ -15,6 +17,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8E4F3A1-2C5D-4E9F-9A1B-3D7C6E8F0A2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8E4F3A1-2C5D-4E9F-9A1B-3D7C6E8F0A2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8E4F3A1-2C5D-4E9F-9A1B-3D7C6E8F0A2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8E4F3A1-2C5D-4E9F-9A1B-3D7C6E8F0A2D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2402F118-D088-415E-BF03-C24E2374496B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2402F118-D088-415E-BF03-C24E2374496B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2402F118-D088-415E-BF03-C24E2374496B}.Release|Any CPU.ActiveCfg = Release|Any CPU
