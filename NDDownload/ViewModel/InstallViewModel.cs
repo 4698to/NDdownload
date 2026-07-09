@@ -25,9 +25,10 @@ namespace NDDownload.ViewModel
     }
     public class InstallViewModel : INotifyPropertyChanged
     {
-        private string RemoteUrl = ResourcesUrl.serverName1;
+        public string RemoteUrl = ResourcesUrl.serverName1; //服务器地址
+        public string title = ResourcesUrl.Windowtitle;
 
-        private static string iniConfig = ResourcesUrl.iniConfig;
+        public static string iniConfig = ResourcesUrl.iniConfig;
         private Ini config;
         private float _progressValue;
         private string _buttonText;
@@ -60,8 +61,11 @@ namespace NDDownload.ViewModel
 
         public bool _setectSource;
 
-        public InstallViewModel(List<string> maxpaths) 
+        public InstallViewModel(List<string> maxpaths , string _remoteUrl) 
         {
+            
+            //设置远程服务器
+            this.RemoteUrl = _remoteUrl;
 
             _remoteVersion = 0;
             //配置文件
@@ -231,9 +235,9 @@ namespace NDDownload.ViewModel
             //this.RemoteUrl = WebAddress.GetBestServer();
             //this.RemoteUrl = await Task.Run(() => WebAddress.GetBestServer());
 
-            this.RemoteUrl = ResourcesUrl.GetServerName(_setectSource);
+            //this.RemoteUrl = ResourcesUrl.GetServerName(_setectSource);
 
-            bool connect = await Task.Run(() => WebAddress.GetBestServer(_setectSource));
+            bool connect = await Task.Run(() => WebAddress.GetBestServer(this.RemoteUrl));
 
             //if (string.IsNullOrEmpty(this.RemoteUrl))
             if (!connect)
@@ -667,13 +671,14 @@ namespace NDDownload.ViewModel
         {
             get
             {
-                if (_setectSource)
+                return this.title;
+                /*if (_setectSource)
                 {
                     return ResourcesUrl.Windowtitle;
                 }
                 else {
                     return ResourcesUrl.Windowtitle2;
-                }
+                }*/
             }
             set {
                 //ResourcesUrl.Windowtitle = value;

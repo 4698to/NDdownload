@@ -28,9 +28,12 @@ namespace NDDownload
         public InstallViewModel _installtree;
         public MainWindow()
         {
+            //anim.nd.com.cn 服务器版本
             InitializeComponent();
             
-            _installtree = new InstallViewModel(GetInstallitem.GetMax());
+            _installtree = new InstallViewModel(GetInstallitem.GetMax(), ResourcesUrl.serverName1);
+            _installtree.title = ResourcesUrl.Windowtitle;
+
             //_installtree.ShowGif = "./imgae/20171005141703.gif";
             _installtree.ShowGif = ResourcesUrl.GetShowGif();
 
@@ -89,10 +92,10 @@ namespace NDDownload
             // 保存快捷方式
             shortcut.Save();
         }
-        private void checkbox_Checked(object sender, RoutedEventArgs e)
-        {
+        //private void checkbox_Checked(object sender, RoutedEventArgs e)
+        //{
             
-        }
+        //}
 
         
         private void btn_do_Click(object sender, RoutedEventArgs e)
@@ -204,11 +207,11 @@ namespace NDDownload
             }
         }
 
-        private void RadioButton_Checked(object sender, RoutedEventArgs e)
-        {
-            this.Title = _installtree.WindowTitle;
-            _installtree.Start();
-        }
+        //private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    //this.Title = _installtree.WindowTitle;
+        //    _installtree.Start();
+        //}
 
         private void Button_select_path_Click(object sender, RoutedEventArgs e)
         {

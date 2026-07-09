@@ -14,36 +14,18 @@ namespace NDDownload.Download
     public static class WebAddress
     {
 
-        public static string GetBestServer()
+       
+        public static bool GetBestServer(string type_remote)
         {
-            if (pingServer2())
-            {
-                return ResourcesUrl.serverName2; //如果内网服务器正常，就是使用内网的
-            }
-            if (pingServer())
-            {
-                return ResourcesUrl.serverName1;
-            }
-            return null;
-        }
-        public static bool GetBestServer(bool type)
-        {
-            if (type)
-            {
-                return pingServer2();
-                //检测内网服务器是否正常，
-            }else
-            {
-                return pingServer();
-                //检测sundaybox服务器是否正常，
-            }
+            Uri uri = new Uri(type_remote);
+            return pingServer(uri.Host);
         }
         //检测腾讯服务器是否正常
-        public static bool pingServer()
+        public static bool pingServer(string host_port)
         {
             using (Ping pingsender = new Ping())
             {
-                PingReply reply = pingsender.Send(ResourcesUrl.serverPort2, 50);
+                PingReply reply = pingsender.Send(host_port, 50);
                 if (reply.Status == IPStatus.Success)
                 {
                     return true;
@@ -51,7 +33,7 @@ namespace NDDownload.Download
             }
             return false;
         }
-        public static bool pingServer2()
+        /*public static bool pingServer2()
         {
             using (Ping pingsender = new Ping())
             {
@@ -62,7 +44,7 @@ namespace NDDownload.Download
                 }
             }
             return false;
-        }
+        }*/
         //检测内网的服务器是否正常
         public static bool pingIp()
         {
