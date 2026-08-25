@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -126,27 +126,30 @@ namespace NDDownload.Download
                 if (max.isSelected)
                 {
                     string max_name = GetInstallItem.GetMaxNameFromPath(max.Path);
-                    DownloadItem im = find_child_item(max_name);
-                    if (im != null) {
-                        temp_item.Add(im);
+                    List<DownloadItem> ims = find_child_items(max_name);
+                    foreach (DownloadItem im in ims)
+                    {
+                        if (!temp_item.Contains(im))
+                        {
+                            temp_item.Add(im);
+                        }
                     }
-
                 }
             }
             return temp_item;
         }
 
-        public DownloadItem find_child_item(string max_name)
+        public List<DownloadItem> find_child_items(string max_name)
         {
-
+            List<DownloadItem> items = new List<DownloadItem>();
             foreach (DownloadItem i in child)
             {
                 if (i.SeriesMinMax(GetInstallItem.GetMaxVersionFromPath(max_name)))
                 {
-                    return i;
+                    items.Add(i);
                 }
             }
-            return null;
+            return items;
         }
         /// <summary>
         /// 设置资源包的临时解压目录
