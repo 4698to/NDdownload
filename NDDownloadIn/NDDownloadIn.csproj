@@ -37,6 +37,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>mao_red.ico</ApplicationIcon>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">

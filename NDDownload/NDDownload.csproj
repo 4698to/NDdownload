@@ -72,6 +72,7 @@
   <PropertyGroup />
   <PropertyGroup>
     <ApplicationIcon>Image\mao.ico</ApplicationIcon>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Downloader, Version=3.0.6.0, Culture=neutral, PublicKeyToken=844973e732f6cdf4, processorArchitecture=MSIL">

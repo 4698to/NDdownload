@@ -39,6 +39,16 @@
 C:\ProgramData\Autodesk\ApplicationPlugins\NDToolsBox\
 ```
 
+### 安装器自更新（服务器）
+
+发布新版安装器时：
+
+1. 提高源码中的 `ResourcesUrl.version` / `buildtime`
+2. 将 `dist\NDToolsBox\` 打成 `NDToolsBox.zip`（zip 根目录即为该文件夹内容）并上传到下载服务器
+3. 上传纯文本 `NDDownload_version.txt`，内容为新版本号（如 `0.44`）
+
+启动 `NDDownload.exe` / `NDDownloadIn.exe` 且联网成功后，会比对服务器版本；若更高则提示下载 zip，退出后解压覆盖安装目录并重启。
+
 ## 相关
 
 - 3ds Max 插件客户端：`NDToolsBox-3dsMax`

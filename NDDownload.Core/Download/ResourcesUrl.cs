@@ -33,6 +33,10 @@ namespace NDDownload.Download
         //服务器上的版本号文件，每次启动下载该文件检测是否有版本更新
         public static string serverVersion = $"{serverName1}updateBox.txt";
 
+        // 安装器自更新（与 updateBox.txt / 工具内容版本无关）
+        public static string installerVersionFile = "NDDownload_version.txt";
+        public static string installerZipName = "NDToolsBox.zip";
+
         
         public static string ApplicationPlugins = @"C:\ProgramData\Autodesk\ApplicationPlugins\NDToolsBox\";
         
@@ -44,6 +48,7 @@ namespace NDDownload.Download
         public static string contentLocal = $"{ApplicationPlugins}InstallBox_version_full.json";
         
         public static string dataModelFileXml = @"C:\ProgramData\Autodesk\ApplicationPlugins\NDToolsBox\ToolLists\NDToolsList.xml";
+        public static string dataModelFileJson = @"C:\ProgramData\Autodesk\ApplicationPlugins\NDToolsBox\ToolLists\NDToolsList.json";
 
         //更新日志
         public static string aboutFile = $"{ApplicationPlugins}About.txt";

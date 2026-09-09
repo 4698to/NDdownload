@@ -207,8 +207,39 @@ namespace NDDownload.ViewModel
                     return;
                 }
 
+                float remoteInstallerVersion;
+                if (SelfUpdater.NeedsUpdate(RemoteUrl, out remoteInstallerVersion))
+                {
+                    // Start() 在 UI 线程上 GetResult 阻塞，不可再 Dispatcher.Invoke，否则会死锁。
+                    // MessageBox 可从工作线程弹出。
+                    var accept = MessageBox.Show(
+                        $"发现安装器新版本 {remoteInstallerVersion}（当前 {ResourcesUrl.version}）。\n是否立即下载并更新？\n\n更新将覆盖整个安装目录并重启程序。",
+                        "安装器更新",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question) == MessageBoxResult.Yes;
+
+                    if (accept)
+                    {
+                        string zipPath = await Task.Run(() => SelfUpdater.DownloadZip(RemoteUrl)).ConfigureAwait(false);
+                        if (string.IsNullOrEmpty(zipPath))
+                        {
+                            Message += "安装器更新包下载失败，将继续使用当前版本。\n";
+                        }
+                        else if (SelfUpdater.ApplyAndRestart(zipPath))
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            Message += "无法启动安装器更新脚本，将继续使用当前版本。\n";
+                        }
+                    }
+                }
+
                 bool fileDone = await Task.Run(() => SimpleDownloadListFile(RemoteUrl, ResourcesUrl.contentLocal)).ConfigureAwait(false);
                 await Task.Run(() => SimpleDownloadListFile(RemoteUrl, ResourcesUrl.aboutFile)).ConfigureAwait(false);
+                await Task.Run(() => SimpleDownloadListFileIfChanged(RemoteUrl, ResourcesUrl.dataModelFileXml)).ConfigureAwait(false);
+                await Task.Run(() => SimpleDownloadListFileIfChanged(RemoteUrl, ResourcesUrl.dataModelFileJson)).ConfigureAwait(false);
 
                 open_about(ResourcesUrl.aboutFile);
 
@@ -466,6 +497,100 @@ namespace NDDownload.ViewModel
                 System.Diagnostics.Debug.WriteLine($"SimpleDownloadListFile failed: {url} -> {localfilename}: {ex.Message}");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 先下载到临时缓存，与本地比对后仅在内容不同时再复制覆盖，避免下载失败破坏本地文件。
+        /// </summary>
+        public static bool SimpleDownloadListFileIfChanged(string weburl, string localfilename)
+        {
+            string url = string.Concat(weburl, Path.GetFileName(localfilename));
+            string tempFile = null;
+            try
+            {
+                Directory.CreateDirectory(ResourcesUrl.TempDownPath);
+                Directory.CreateDirectory(Path.GetDirectoryName(localfilename));
+
+                tempFile = Path.Combine(ResourcesUrl.TempDownPath, Path.GetFileName(localfilename) + ".download");
+                if (File.Exists(tempFile))
+                {
+                    File.Delete(tempFile);
+                }
+
+                using (WebClient web = new WebClient())
+                {
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                    web.Proxy = null;
+                    web.DownloadFile(url, tempFile);
+                }
+
+                if (!File.Exists(tempFile))
+                {
+                    return false;
+                }
+
+                if (File.Exists(localfilename) && FilesAreEqual(localfilename, tempFile))
+                {
+                    return true;
+                }
+
+                File.Copy(tempFile, localfilename, true);
+                return File.Exists(localfilename);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SimpleDownloadListFileIfChanged failed: {url} -> {localfilename}: {ex.Message}");
+                return File.Exists(localfilename);
+            }
+            finally
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(tempFile) && File.Exists(tempFile))
+                    {
+                        File.Delete(tempFile);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Cleanup temp download failed: {ex.Message}");
+                }
+            }
+        }
+
+        private static bool FilesAreEqual(string pathA, string pathB)
+        {
+            var infoA = new FileInfo(pathA);
+            var infoB = new FileInfo(pathB);
+            if (infoA.Length != infoB.Length)
+            {
+                return false;
+            }
+
+            const int bufferSize = 81920;
+            byte[] bufferA = new byte[bufferSize];
+            byte[] bufferB = new byte[bufferSize];
+            using (FileStream streamA = File.OpenRead(pathA))
+            using (FileStream streamB = File.OpenRead(pathB))
+            {
+                int readA;
+                while ((readA = streamA.Read(bufferA, 0, bufferSize)) > 0)
+                {
+                    int readB = streamB.Read(bufferB, 0, bufferSize);
+                    if (readA != readB)
+                    {
+                        return false;
+                    }
+                    for (int i = 0; i < readA; i++)
+                    {
+                        if (bufferA[i] != bufferB[i])
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
         public List<DownloadItem> GetDownloadItems(string weburl, string xmlfile, ref float _remoteVersion)
         {

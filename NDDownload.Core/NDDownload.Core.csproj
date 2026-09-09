@@ -84,6 +84,7 @@
     <Compile Include="Download\InstallChannel.cs" />
     <Compile Include="Download\OfflineInstallation.cs" />
     <Compile Include="Download\ResourcesUrl.cs" />
+    <Compile Include="Download\SelfUpdater.cs" />
     <Compile Include="Download\WebAddress.cs" />
     <Compile Include="Ini.cs" />
     <Compile Include="InstallHelp.xaml.cs">
