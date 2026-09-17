@@ -94,6 +94,10 @@ namespace NDDownload.Download
                     {
                         continue;
                     }
+                    if (ResourcesUrl.IsInstallerPackage(ifile.zipname))
+                    {
+                        continue;
+                    }
 
                     ifile.SetTempPath();
                     ifile.serverUrl = remote;
@@ -106,7 +110,7 @@ namespace NDDownload.Download
                         foreach (JToken citem in ichild)
                         {
                             DownloadItem ici = citem.ToObject<DownloadItem>();
-                            if (ici != null)
+                            if (ici != null && !ResourcesUrl.IsInstallerPackage(ici.zipname))
                             {
                                 ici.serverUrl = remote;
                                 ici.SetTempPath();
@@ -157,6 +161,10 @@ namespace NDDownload.Download
                 item.serverUrl = remote;
 
                 item.zipname = site.Attributes["name"].Value;
+                if (ResourcesUrl.IsInstallerPackage(item.zipname))
+                {
+                    continue;
+                }
                 item.SetTempPath();
 
                 //item.FileName = Path.Combine(MaxRoot, site.Attributes["name"].Value);

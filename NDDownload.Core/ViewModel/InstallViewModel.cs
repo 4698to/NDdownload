@@ -120,14 +120,19 @@ namespace NDDownload.ViewModel
                     if (!i.quick) { index += 1; }
                     if (!i.Item.isParent)
                     {
-                        DownloadList.Add(i.Item);
+                        if (!ResourcesUrl.IsInstallerPackage(i.Item.zipname))
+                        {
+                            DownloadList.Add(i.Item);
+                        }
                     }
                     else
                     {
                         //这里直接收集子级，不合适，得做选择版本匹配
                         if (i.Item.child != null)
                         {
-                            DownloadList.AddRange(i.Item.TestMaxVersion(MaxInstallSelect));
+                            DownloadList.AddRange(
+                                i.Item.TestMaxVersion(MaxInstallSelect)
+                                    .Where(item => !ResourcesUrl.IsInstallerPackage(item.zipname)));
                         }
                     }
                 }
@@ -205,35 +210,6 @@ namespace NDDownload.ViewModel
                 if (!_islink)
                 {
                     return;
-                }
-
-                float remoteInstallerVersion;
-                if (SelfUpdater.NeedsUpdate(RemoteUrl, out remoteInstallerVersion))
-                {
-                    // Start() 在 UI 线程上 GetResult 阻塞，不可再 Dispatcher.Invoke，否则会死锁。
-                    // MessageBox 可从工作线程弹出。
-                    var accept = MessageBox.Show(
-                        $"发现安装器新版本 {remoteInstallerVersion}（当前 {ResourcesUrl.version}）。\n是否立即下载并更新？\n\n更新将覆盖整个安装目录并重启程序。",
-                        "安装器更新",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question) == MessageBoxResult.Yes;
-
-                    if (accept)
-                    {
-                        string zipPath = await Task.Run(() => SelfUpdater.DownloadZip(RemoteUrl)).ConfigureAwait(false);
-                        if (string.IsNullOrEmpty(zipPath))
-                        {
-                            Message += "安装器更新包下载失败，将继续使用当前版本。\n";
-                        }
-                        else if (SelfUpdater.ApplyAndRestart(zipPath))
-                        {
-                            return;
-                        }
-                        else
-                        {
-                            Message += "无法启动安装器更新脚本，将继续使用当前版本。\n";
-                        }
-                    }
                 }
 
                 bool fileDone = await Task.Run(() => SimpleDownloadListFile(RemoteUrl, ResourcesUrl.contentLocal)).ConfigureAwait(false);

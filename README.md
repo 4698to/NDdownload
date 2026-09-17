@@ -43,11 +43,15 @@ C:\ProgramData\Autodesk\ApplicationPlugins\NDToolsBox\
 
 发布新版安装器时：
 
-1. 提高源码中的 `ResourcesUrl.version` / `buildtime`
-2. 将 `dist\NDToolsBox\` 打成 `NDToolsBox.zip`（zip 根目录即为该文件夹内容）并上传到下载服务器
-3. 上传纯文本 `NDDownload_version.txt`，内容为新版本号（如 `0.44`）
+1. 提高源码中的 `ResourcesUrl.version` / `buildtime`（必须与将上传的 zip 内编译版本一致）
+2. 执行 `build-channels.ps1`：会从 `ResourcesUrl.version` 自动生成 `dist\NDToolsBox\NDDownload_version.txt`（并复制到 `dist\NDDownload_version.txt`）
+3. 将 `dist\NDToolsBox\` **目录内的文件**打成 `NDToolsBox.zip`（推荐 zip 根目录直接是 exe/dll，不要再包一层多余文件夹）并上传；同时上传同版本的 `NDDownload_version.txt`
+
+若服务器上的 `NDDownload_version.txt` 比本地新，但 zip 里仍是旧版 exe，更新后会反复提示——务必保证二者版本一致。
 
 启动 `NDDownload.exe` / `NDDownloadIn.exe` 且联网成功后，会比对服务器版本；若更高则提示下载 zip，退出后解压覆盖安装目录并重启。
+
+**注意：** 不要把 `NDToolsBox.zip` 写入 `InstallBox_version_full.json` 工具清单。该包仅用于安装器自更新；若进入安装/卸载列表，卸载时可能删掉安装器自身。客户端也会硬性过滤该项。
 
 ## 相关
 

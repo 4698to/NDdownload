@@ -54,6 +54,19 @@ Get-ChildItem $inOut -File | Where-Object {
     Copy-Item $_.FullName $outDir -Force
 }
 
+# 从 ResourcesUrl.version 生成服务器用版本文件
+$resourcesUrlCs = Join-Path $root 'NDDownload.Core\Download\ResourcesUrl.cs'
+$versionMatch = Select-String -Path $resourcesUrlCs -Pattern 'public\s+static\s+float\s+version\s*=\s*([0-9]+(?:\.[0-9]+)?)f?\s*;' | Select-Object -First 1
+if (-not $versionMatch) {
+    throw "Cannot parse ResourcesUrl.version from $resourcesUrlCs"
+}
+$installerVersion = $versionMatch.Matches[0].Groups[1].Value
+$versionFileName = 'NDDownload_version.txt'
+$versionOut = Join-Path $outDir $versionFileName
+Set-Content -Path $versionOut -Value $installerVersion -Encoding ASCII -NoNewline
+Copy-Item $versionOut (Join-Path $distRoot $versionFileName) -Force
+Write-Host "  $versionFileName = $installerVersion" -ForegroundColor Green
+
 $readmeLines = @(
     'NDToolsBox installer bundle'
     ''
@@ -64,6 +77,7 @@ $readmeLines = @(
     ''
     'Entry 2: NDDownloadIn.exe - Company intranet server only'
     ''
+    "Installer version: $installerVersion"
     "Configuration: $Configuration"
     "Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 )
@@ -77,3 +91,4 @@ Write-Host '  NDDownload.exe' -ForegroundColor Green
 Write-Host '  NDDownloadIn.exe' -ForegroundColor Green
 Write-Host ''
 Write-Host "Done: $outDir" -ForegroundColor Cyan
+Write-Host "Upload to server: $versionFileName (also at dist\$versionFileName)" -ForegroundColor Cyan

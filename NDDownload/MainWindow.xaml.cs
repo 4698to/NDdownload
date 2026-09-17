@@ -37,33 +37,41 @@ namespace NDDownload
             this.DataContext = _installtree;
             this.Title = _installtree.WindowTitle;
 
-            _installtree.Start();//下载服务器上内容清单，
+            Loaded += MainWindow_Loaded;
+        }
 
-            _installtree.GetScriptPath();//获取用户配置的自定义脚本文件夹
-            _installtree.GetToolsList();//获取用户设置的工具列表配置文件
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= MainWindow_Loaded;
 
-            //启动下载器就去掉 max2015 的盒子UI配置
+            string remoteUrl = ResourcesUrl.GetServerName(InstallChannel.DefaultUseTencentServer);
+            bool updating = await SelfUpdater.RunInteractiveAsync(remoteUrl);
+            if (updating)
+            {
+                return;
+            }
+
+            _installtree.Start();
+
+            _installtree.GetScriptPath();
+            _installtree.GetToolsList();
+
             ResetMaxCUI.Reset();
 
 
             //显示的版本号
             show_version.Text = $"Version : {ResourcesUrl.version} , {ResourcesUrl.buildtime}";
 
-            // 获取桌面路径
             string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
-            // 快捷方式的目标路径（你要创建快捷方式的应用程序路径）
             string targetPath = InstallChannel.GetInstalledExePath();
             if (System.IO.File.Exists(targetPath))
             {
                 string short_path = System.IO.Path.Combine(desktopPath, "天晴盒子.lnk");
                 if (!System.IO.File.Exists(short_path))
                 {
-                    // 创建快捷方式
                     CreateShortcut(short_path, targetPath);
                 }
             }
-
         }
 
         static void CreateShortcut(string shortcutPath, string targetPath)

@@ -79,8 +79,8 @@
                         <RowDefinition Height="2" x:Name="r1"/>
                         <RowDefinition Height="2" x:Name="r2"/>
 
-                        <RowDefinition x:Name="r3" Height="*"  MinHeight="200" MaxHeight="450" />
-                        <RowDefinition x:Name="r4" Height="180*" />
+                        <RowDefinition x:Name="r3" Height="Auto" />
+                        <RowDefinition x:Name="r4" Height="*" />
 
                         <RowDefinition Height="30" x:Name="r5"/>
                         <RowDefinition Height="55" x:Name="r6"/>
@@ -91,12 +91,25 @@
                     <ProgressBar x:Name="progerss" Height="30" Grid.Row="0" Value="{Binding ProgressValue}" Grid.ColumnSpan="2" Margin="0,2,0,3"/>
                     <!--<TextBlock x:Name="text1" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding localVersionMessage}" Style="{StaticResource text0}" />-->
                     <!--<TextBlock x:Name="text2" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding remoteVersionMessage}" Style="{StaticResource text0}"/>-->
-                    <!--3dsMax版本选择-->
-                    <DockPanel Grid.Row="3" Grid.ColumnSpan="2" >
-                        <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
+                    <!--3dsMax版本选择：行高随列表内容自适应，多余高度留给下方安装内容列表-->
+                    <Grid Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel x:Name="maxVersionPanel" Grid.Column="0" Orientation="Vertical">
                             <TextBlock x:Name="text4" Text="请选择需要安装的 3ds Max 版本" Style="{StaticResource text4}" Margin="10 0 0 0"/>
                             <CheckBox x:Name="select_all" Content="全选" IsChecked="False" Margin="10 2 0 2" Click="select_all_Checked" />
-                            <ListBox x:Name="listBox" ItemsSource="{Binding MaxInstallSelect}" HorizontalAlignment="Left" Margin="10 0 0 25" Width="210" >
+                            <ListBox x:Name="listBox" ItemsSource="{Binding MaxInstallSelect}"
+                                     HorizontalAlignment="Left" Margin="10 0 0 8" Width="210"
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     VirtualizingStackPanel.IsVirtualizing="False">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
@@ -111,12 +124,14 @@
                                 </ListBox.ItemTemplate>
                             </ListBox>
                         </StackPanel>
-                        <ScrollViewer x:Name="textBoxScroll" DockPanel.Dock="Right" VerticalScrollBarVisibility ="Auto" HorizontalScrollBarVisibility="Auto">
-                            <TextBlock x:Name="textBox"  Text="{Binding Message}"  Margin="20 2 20 2"/>
+                        <ScrollViewer x:Name="textBoxScroll" Grid.Column="1" VerticalAlignment="Top"
+                                      MaxHeight="{Binding ActualHeight, ElementName=maxVersionPanel}"
+                                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <TextBlock x:Name="textBox" Text="{Binding Message}" Margin="20 2 20 2"/>
                         </ScrollViewer>
-                    </DockPanel>
+                    </Grid>
                     <!--下载资源选择-->
-                    <DockPanel x:Name="li" Grid.Row="4" LastChildFill="True" Grid.ColumnSpan="2" Margin="0,0,0,30" Grid.RowSpan="2" >
+                    <DockPanel x:Name="li" Grid.Row="4" LastChildFill="True" Grid.ColumnSpan="2" >
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" VerticalAlignment="Center">
                             <TextBlock x:Name="ttt" Text="选择需要安装内容"  Style="{StaticResource text4}" Margin="10 2 0 2" />
                             <CheckBox x:Name="select_file_all" Content="全选" IsChecked="False" Margin="10 4 0 0" Click="select_all_file_Checked" />

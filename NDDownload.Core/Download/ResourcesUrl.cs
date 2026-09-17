@@ -11,8 +11,8 @@ namespace NDDownload.Download
     public class ResourcesUrl
     {
 
-        public static float version = 0.43f;
-        public static string buildtime = "2026.08.25";
+        public static float version = 0.45f;
+        public static string buildtime = "2026.09.17";
         public static string Windowtitle = $"天晴盒子安装 - 公共服务器 - QQ群:797581676 | Ver.{version}";
         public static string Windowtitle2 = $"天晴盒子安装 - 内网服务器 - 联系99U:199505 | Ver.{version}";
 
@@ -36,6 +36,23 @@ namespace NDDownload.Download
         // 安装器自更新（与 updateBox.txt / 工具内容版本无关）
         public static string installerVersionFile = "NDDownload_version.txt";
         public static string installerZipName = "NDToolsBox.zip";
+
+        /// <summary>
+        /// 是否为安装器自更新包（不可进入工具安装/卸载列表）。
+        /// </summary>
+        public static bool IsInstallerPackage(string zipname)
+        {
+            if (string.IsNullOrEmpty(zipname))
+            {
+                return false;
+            }
+            string name = System.IO.Path.GetFileName(zipname);
+            if (!System.IO.Path.HasExtension(name))
+            {
+                name = System.IO.Path.ChangeExtension(name, ".zip");
+            }
+            return string.Equals(name, installerZipName, StringComparison.OrdinalIgnoreCase);
+        }
 
         
         public static string ApplicationPlugins = @"C:\ProgramData\Autodesk\ApplicationPlugins\NDToolsBox\";
